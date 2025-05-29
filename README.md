@@ -2,13 +2,14 @@
 
 [Paper Link](https://www.techrxiv.org/users/788558/articles/1022587-kinematic-and-dynamic-modeling-of-cable-object-interference-and-wrapping-in-complex-geometrical-shaped-cable-driven-parallel-robots)
 
-## Video Demonstration
+## Multimedia
 
-Watch the video demonstration of the GeoWrapSim-CDPR in action:
+### Application Preview
+![GeoWrapSim-CDPR](resources/figures/fig_git.png)
 
-[![GeoWrapSim-CDPR Video](resources/figures/fig_git.png)](resources/vid/Video.mp4)
+### Full Video
+Click [here](resources/vid/Video.mp4) to view the full video.
 
-Click the image above or [here](resources/vid/Video.mp4) to view the video.
 ## Installation
 
 To set up the repository, follow these steps:
