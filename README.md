@@ -1,4 +1,8 @@
+# Kinematic and Dynamic Modeling of Cable-Object Interference and Wrapping in Complex Geometrical-Shaped Cable-Driven Parallel Robots
+
 [Paper Link](https://www.techrxiv.org/users/788558/articles/1022587-kinematic-and-dynamic-modeling-of-cable-object-interference-and-wrapping-in-complex-geometrical-shaped-cable-driven-parallel-robots)
+
+![GeoWrapSim-CDPR Overview](figures/fig_git.png)
 
 ## Installation
 
@@ -27,7 +31,6 @@ The tutorial scripts provided in the `scripts/CASPR_tutorials` folder are untest
 Additionally, you can explore the CASPR tutorial series on YouTube for step-by-step guidance:  
 [CASPR YouTube Playlist](https://www.youtube.com/watch?v=b_24t_j1uQo&list=PLZCfv3Lre4aVbsS8zFYlg2x-kPuB-rrRC)
 
-## Model
 ## Model
 
 ### NURBS Teapot Model
