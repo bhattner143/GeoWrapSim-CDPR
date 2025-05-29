@@ -1,0 +1,102 @@
+%% Creator: Inkscape 1.4 (e7c3feb1, 2024-10-09), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'fig_gen_cable_wrapping_2.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{510.23622047bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.17777778)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.67378812,0.1701513){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Case 2: Self-wrapping\end{tabular}}}}%
+    \put(0.91502089,0.12560605){\makebox(0,0)[lt]{\lineheight{0.85000002}\smash{\begin{tabular}[t]{l}Mobile-\\platform\\${\bm{R}}_{n+1}(u,v)$\end{tabular}}}}%
+    \put(0.11848295,0.06047378){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{\bar\alpha}_{CD_{\gamma,1}}(\tau)}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.18645858,0.00187698){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Case 1: Obstacle-wrapping\end{tabular}}}}%
+    \put(0.80006728,0.12891155){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$A_1$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.82027457,0.10575232){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$G$\end{tabular}}}}%
+    \put(0.32782015,0.14389605){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$O$\end{tabular}}}}%
+    \put(0.0400964,0.07203363){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$S_1$\end{tabular}}}}%
+    \put(0.20713532,0.06266837){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{\gamma,1}$\end{tabular}}}}%
+    \put(0.1137917,0.024603){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$D_{\gamma,1}$\end{tabular}}}}%
+    \put(0.89203674,0.16610582){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$P_1$\end{tabular}}}}%
+    \put(0.00487957,-0.00425911){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{\g,0}=P_\gamma$\end{tabular}}}}%
+    \put(0.93610667,0.02623962){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$P_m$\end{tabular}}}}%
+    \put(0.72164125,0.03305312){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$ D_{\g,n+1}=B_\gamma$\end{tabular}}}}%
+    \put(0.82085907,0.05289686){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$ C_{\gamma,n+1}=A_\gamma$\end{tabular}}}}%
+    \put(0.34632457,0.1649116){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\{F_O\}$\end{tabular}}}}%
+    \put(0.05223843,0.11333241){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\{F_{S_1}\}$\end{tabular}}}}%
+    \put(0.85013348,0.12265177){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\{F_G\}$\end{tabular}}}}%
+    \put(0.8367049,0.16477021){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$B_1$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.57843057,0.16460364){\makebox(0,0)[lt]{\lineheight{0.85000002}\smash{\begin{tabular}[t]{l}\\${\bm{R}}_{n}(u,v)$\end{tabular}}}}%
+    \put(0.55063617,0.09940807){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{\bar\alpha}_{CD_{\gamma,n}}(\tau)}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.11782009,0.08375891){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Obstacle $1$\end{tabular}}}}%
+    \put(0.46930967,0.09626883){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$S_{n}$\end{tabular}}}}%
+    \put(0.63855359,0.09756039){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{\gamma,n}$\end{tabular}}}}%
+    \put(0.55026543,0.06183046){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$D_{\gamma,n}$\end{tabular}}}}%
+    \put(0.48715308,0.13600855){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\{F_{S_{n}}\}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.13281603,0.14646111){\makebox(0,0)[lt]{\lineheight{0.85000002}\smash{\begin{tabular}[t]{l}Obstacle \\surface \\${\bm{R}}_{1}(u,v)$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.34986001,0.12013896){\makebox(0,0)[lt]{\lineheight{0.85000002}\smash{\begin{tabular}[t]{l}\\${\bm{R}}_{\zeta}(u,v)$\end{tabular}}}}%
+    \put(0.33721762,0.02717533){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$D_{\gamma,\zeta}$\end{tabular}}}}%
+    \put(0.36662026,0.05128633){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{\gamma,\zeta}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.36813271,0.07076664){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Obstacle $\zeta$\end{tabular}}}}%
+    \put(0.56371474,0.1163211){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Obstacle $n$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.69195888,0.0932581){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$ {\bm r}_{D_{\g,n+1}C_{\g,n}} $\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{fig_gen_cable_wrapping_2.pdf}}%
+    \put(0.68739159,0.11915631){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{\bar\alpha}_{CD_{\gamma,n+1}}}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{fig_gen_cable_wrapping_2.pdf}}%
+  \end{picture}%
+\endgroup%

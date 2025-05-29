@@ -1,0 +1,80 @@
+%% Creator: Inkscape 1.3.2 (091e20e, 2023-11-25), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'figure_interference_det_wire_frame_row.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{498.8976378bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.17045455)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0.67942132,-0.00351686){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}(b)\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{figure_interference_det_wire_frame_row.pdf}}%
+    \put(0.88691854,0.07171111){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$D_{\zeta_n}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{figure_interference_det_wire_frame_row.pdf}}%
+    \put(0.508189,0.02035876){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{\zeta_{p}}$\end{tabular}}}}%
+    \put(0.48631749,0.10053819){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$S_\zeta$\end{tabular}}}}%
+    \put(0.50099311,0.14037199){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\{F_{S_\zeta}\}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{figure_interference_det_wire_frame_row.pdf}}%
+    \put(0.68705755,0.02365638){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$E_{\zeta,\delta}$\end{tabular}}}}%
+    \put(0.74073406,0.1283735){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$G_\zeta,\delta$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{figure_interference_det_wire_frame_row.pdf}}%
+    \put(0.44084448,0.02525813){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\cal{P}$\end{tabular}}}}%
+    \put(0.71565988,0.08318057){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{r}}_{EG_{\zeta,\delta}}$\end{tabular}}}}%
+    \put(0.81534604,0.06447259){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{r}}_{D_{\zeta_{n}}C_{\zeta_{p}}}$\end{tabular}}}}%
+    \put(0.58529438,0.11146769){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{r}}_{S_\zeta D_{\zeta_{n}}}$\end{tabular}}}}%
+    \put(0.58135575,0.07357112){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{r}}_{SE_{\zeta,\delta}}$\end{tabular}}}}%
+    \put(0.6986841,0.04898577){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$F_{\zeta,\delta}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{figure_interference_det_wire_frame_row.pdf}}%
+    \put(0.44652664,0.07293827){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$O$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{figure_interference_det_wire_frame_row.pdf}}%
+    \put(0.25277581,-0.00729553){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}(a)\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{figure_interference_det_wire_frame_row.pdf}}%
+    \put(0.70828608,0.14911){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm n}_\delta$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

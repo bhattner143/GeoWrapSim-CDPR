@@ -1,0 +1,109 @@
+%% Creator: Inkscape 1.4 (e7c3feb1, 2024-10-09), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'figure_complete_framework.svg' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{538.58267717bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,1.56315789)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{figure_complete_framework.svg}}%
+    \put(0.599689,1.54504282){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Previous time-step \\$\bar{u}^\star(0),\bar{v}^\star(0),\bar{u}^{\prime,\star}(0),\bar{v}^{\prime,\star}(0)$\\as initial value \end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{figure_complete_framework.svg}}%
+    \put(0.48462319,1.67502788){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{r}Cable wrapping \\geodesic optimizer\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{figure_complete_framework.svg}}%
+    \put(0.46488166,1.36144168){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}$\bar{u}(0),\bar{v}(0),\bar{u}^{\prime}(0),\bar{v}^{\prime}(0)$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{figure_complete_framework.svg}}%
+    \put(0.308642,1.35359405){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}${{\bm{\bar\alpha}}_{CD}}(\tau)$\end{tabular}}}}%
+    \put(0.46773533,1.27748389){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}${{\bm{\bar\alpha}}^\star_{CD}}(\tau) = {\bm{R}}(\bar{u}^\star(\tau),\bar{v}^\star(\tau))$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{figure_complete_framework.svg}}%
+    \put(0.36637676,1.23570253){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Obtain CWG end-points \\$C_{\g,\zeta},D_{\g,\zeta}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{figure_complete_framework.svg}}%
+    \put(0.48357484,1.09895927){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Cable length change $\bm{\dot{l}}$ \end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{figure_complete_framework.svg}}%
+    \put(0.36410167,1.50909994){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Run cable-multi-object \\interfernce detection \\(Algorithm 1))\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{figure_complete_framework.svg}}%
+    \put(0.04881971,1.50790345){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.75}\smash{\begin{tabular}[t]{l}Generate CDPR NURBS  objects from \\parametric equations \eqref{eqn:nurbs}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{figure_complete_framework.svg}}%
+    \put(0.21597443,1.68700446){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Bezier surface \eqref{}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{figure_complete_framework.svg}}%
+    \put(0.05381359,1.23291729){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Initialize cable-multi-object\\interference detection\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{figure_complete_framework.svg}}%
+    \put(0.0521397,1.13830485){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Initialize NLS bounds\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{figure_complete_framework.svg}}%
+    \put(0.36790866,1.32451158){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Update CWG by numerically \\solving $\eqref{eqn:geodesic_eqn}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{figure_complete_framework.svg}}%
+    \put(0.04513536,1.06713373){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Generate reference joint space \\trajectory $\bm{q},\bm{\dot{q}}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{figure_complete_framework.svg}}%
+    \put(0.36638953,1.4060483){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Solve NLS problem in $\eqref{eqn:cable_optimization_problem}$ \end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{figure_complete_framework.svg}}%
+    \put(0.05256903,1.41978037){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Intialize cable attachment points $P$ and   $A$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{figure_complete_framework.svg}}%
+    \put(0.05677379,1.33568509){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Generate the CDPR model \\for initial joint state $\bm{q}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{figure_complete_framework.svg}}%
+    \put(0.47220447,1.45257751){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}CCM, wrapping scenario\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{figure_complete_framework.svg}}%
+    \put(0.3107415,1.10274116){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}$S\bm{\dot{q}}$\end{tabular}}}}%
+    \put(0.3048548,1.16076692){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}$CCM, n,\eta_n,\eta_{n+1}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=19]{figure_complete_framework.svg}}%
+    \put(0.35951675,1.14478884){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Obtain $V$ from \eqref{eqn:l_dot_obs_self} and \eqref{eqn:wrapping_pts} \end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=20]{figure_complete_framework.svg}}%
+    \put(0.29172616,1.54874408){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Cable optimizer for present time-step\end{tabular}}}}%
+    \put(0.28952145,1.03797089){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}CWG-based Inverse Kinematics (CWGIK) model (time-loop)\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=21]{figure_complete_framework.svg}}%
+    \put(0.7456873,1.41593357){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}CWG-based Inverse Dynamics\\(CWGID) from \eqref{eqn:ID_obj_func}\end{tabular}}}}%
+    \put(0.74997284,1.49703487){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Obtain $\bm{M},\bm{C},\bm{G}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=22]{figure_complete_framework.svg}}%
+    \put(0.75818931,1.31495592){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Friction model \eqref{eqn:T_out_T_in_zeta}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=23]{figure_complete_framework.svg}}%
+    \put(0.85714055,1.25464072){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Friction compensated cable tension\\$\bm{f}_{D_1}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=24]{figure_complete_framework.svg}}%
+    \put(0.86418395,1.3601495){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.94999999}\smash{\begin{tabular}[t]{l}Cable tension $\bm{f}_{C_{n+1}}=\bm{f}$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

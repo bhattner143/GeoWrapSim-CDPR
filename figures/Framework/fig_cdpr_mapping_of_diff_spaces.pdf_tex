@@ -1,0 +1,76 @@
+%% Creator: Inkscape 1.0.2-2 (e86c870879, 2021-01-15), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'fig_cdpr_mapping_of_diff_spaces.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{249.4488189bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.36363636)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{fig_cdpr_mapping_of_diff_spaces.pdf}}%
+    \put(0.1599609,0.35229521){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Actuation \\Space\end{tabular}}}}%
+    \put(0.3549609,0.26229521){\makebox(0,0)[t]{\lineheight{1.25}{\color{red}\smash{\begin{tabular}[t]{c}Actuation \\Redundancy\end{tabular}}}}}%
+    \put(0.3349609,0.07129521){\makebox(0,0)[t]{\lineheight{1.25}{\color{black}\smash{\begin{tabular}[t]{c}ID\end{tabular}}}}}%
+    \put(0.51746244,0.353229521){\makebox(0,0)[t]{\lineheight{1.25}\smash{\color{black}{\begin{tabular}[t]{c}Joint \\Space\end{tabular}}}}}%
+    \put(0.71746244,0.26229521){\makebox(0,0)[t]{\lineheight{1.25}\smash{\color{red}{\begin{tabular}[t]{c}Kinematic \\Redundancy\end{tabular}}}}}%
+    \put(0.7099609,0.07129521){\makebox(0,0)[t]{\lineheight{1.25}{\color{black}\smash{\begin{tabular}[t]{c}IK\end{tabular}}}}}%
+    \put(0.88141622,0.35282672){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Operational \\Space\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{fig_cdpr_mapping_of_diff_spaces.pdf}}%
+%    \put(0.1148357,0.12418962){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\bm{a}(t)$\end{tabular}}}}%
+%    \put(0.48368314,0.12418962){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\bm{q}(t)$\end{tabular}}}}%
+%    \put(0.86953712,0.12418962){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\bm{x}(t)$\end{tabular}}}}%
+    \put(0.25076474,0.01948377){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$m+p>n$\end{tabular}}}}%
+    \put(0.67460763,0.01617178){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$n>r$\end{tabular}}}}%
+    \put(0.05781723,0.25786473){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\bm{a}(t)\in\mathbb{R}^{m+p}$\end{tabular}}}}%
+    \put(0.44109739,0.25286473){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\bm{q}(t)\in\mathbb{R}^{n}$\end{tabular}}}}%
+    \put(0.8291639,0.25286473){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\bm{x}(t)\in\mathbb{R}^{r}$\end{tabular}}}}%
+    \put(0.6400214,0.16077193){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}FK $\bm{s}_2(\boldsymbol{\cdot})$\end{tabular}}}}% 
+    \put(0.3000214,0.16077193){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\bm{s}_1(\boldsymbol{\cdot})$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

@@ -1,0 +1,70 @@
+%% Creator: Inkscape 1.3.2 (091e20e, 2023-11-25, custom), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'fig_cwso_free_ends.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{249.4488189bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.34090909)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{fig_cwso_free_ends.pdf}}%
+    \put(0.08433299,0.23085908){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\{F_{S_\zeta}\}$\end{tabular}}}}%
+    \put(0.48091056,0.15898874){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$D^\star_\zeta$\end{tabular}}}}%
+    \put(0.14179872,0.18166001){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$S_\zeta$\end{tabular}}}}%
+    \put(0.76114108,0.30062353){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${D_{\zeta+1}}$\end{tabular}}}}%
+    \put(0.32490709,0.00585042){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${C_{\zeta-1}}$\end{tabular}}}}%
+    \put(0.57443688,0.2319453){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C^\star_\zeta$\end{tabular}}}}%
+    \put(-0.0001732,0.3101703){\makebox(0,0)[lt]{\lineheight{0.75}\smash{\begin{tabular}[t]{l}Unoptimized \\CWG\end{tabular}}}}%
+    \put(0.643463,0.25390204){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}${\bm{r}}^\star_{D_{\zeta+1}C_\zeta}$\end{tabular}}}}%
+    \put(0.34760584,0.24184961){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$D^0_\zeta$\end{tabular}}}}%
+    \put(0.53571007,0.30146632){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C^0_\zeta$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{fig_cwso_free_ends.pdf}}%
+    \put(0.83598492,0.20159164){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.75}\smash{\begin{tabular}[t]{l}Optimized\\CWG ${\bm{\bar\alpha}}^\star_{CD_\zeta}(\tau)$\\when ${\bm{\mu}}={\bm{\mu}}^\star$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%
