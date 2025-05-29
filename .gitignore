@@ -8,5 +8,7 @@ data/trajectories/
 data/model_config/tmp_compilations
 GUI/config
 
+resources/figure/fig_git
+
 logs/
 /**/*.asv
