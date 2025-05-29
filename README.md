@@ -4,6 +4,13 @@
 
 ![GeoWrapSim-CDPR Overview](resources/figures/fig_git.png)
 
+## Video Demonstration
+
+Watch the video demonstration of the GeoWrapSim-CDPR in action:
+
+[![GeoWrapSim-CDPR Video](resources/figures/fig_git.png)](resources/vid/Video.mp4)
+
+Click the image above or [here](resources/vid/Video.mp4) to view the video.
 ## Installation
 
 To set up the repository, follow these steps:
