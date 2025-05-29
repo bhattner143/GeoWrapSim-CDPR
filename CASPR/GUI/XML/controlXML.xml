@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST solver_class id ID #REQUIRED>
+]>
+<simulator>
+    <control_class id="ComputedTorqueController"/>
+    <control_class id="LyapunovStaticCompensation"/>
+	<id_solver_class id="IDSolverLinProg"/>
+	<id_solver_class id="IDSolverQuadProg"/>
+	<id_solver_class id="IDSolverFeasiblePolygon"/>
+    <id_solver_class id="IDSolverOptimallySafe"/>
+    <id_solver_class id="IDSolverClosedForm"/>
+    <id_solver_class id="IDSolverMinInfNorm"/>
+	<fd_solver_class id="ODE45"/>
+	<fd_solver_class id="ODE23"/>
+	<fd_solver_class id="ODE113"/>
+	<fd_solver_class id="ODE15S"/>
+	<fd_solver_class id="ODE23S"/>
+	<fd_solver_class id="ODE23T"/>
+	<fd_solver_class id="ODE23TB"/>
+	<fd_solver_class id="ODE4"/>
+	<fd_solver_class id="ODE1"/>
+	<plot_functions>
+        <plot_function type="plotCableForces">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotInteractionForceMagnitudes">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotAngularVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotAngularAcceleration">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotBodyCoG">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotBodyCoGVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotBodyCoGAcceleration">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotJointPose">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotJointVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotCableLengths">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotCableLengthsVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+	</plot_functions>
+</simulator>

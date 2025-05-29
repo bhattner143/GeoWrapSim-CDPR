@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST solver_class id ID #REQUIRED>
+]>
+<simulator>
+	<solver_class id="IDSolverLinProg"/>
+	<solver_class id="IDSolverQuadProg"/>
+	<solver_class id="IDSolverFeasiblePolygon"/>
+    <solver_class id="IDSolverOptimallySafe"/>
+    <solver_class id="IDSolverClosedForm"/>
+    <solver_class id="IDSolverMinInfNorm"/>
+	<plot_functions>
+        <plot_function type="guiPlotCableForces">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotInteractionForceMagnitudes">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotAngularVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotAngularAcceleration">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotBodyCoG">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotBodyCoGVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotBodyCoGAcceleration">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotJointPose">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotJointVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotJointAcceleration">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotCableLengths">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="guiPlotCableLengthsVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+	</plot_functions>
+</simulator>

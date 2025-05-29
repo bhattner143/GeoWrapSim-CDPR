@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
+<bodies_system>
+    <links display_range="-0.3 0.3 0.0 1.0 -0.3 0.3" view_angle="-37 32">
+      <link_rigid num="1" name="Upper Arm">
+        <joint type="S_EULER_XYZ" q_initial="0.18 0.3 0.0" q_min="-1.0 -1.0 -1.0" q_max="1.0 1.0 1.0"/>
+        <physical>
+          <mass>0.9810187</mass>
+          <com_location>6.11879e-05 0.142722 9.20007e-05</com_location>
+          <end_location>0 0.3670 0</end_location>
+          <inertia ref="com">
+            <Ixx>0.0217208</Ixx>
+            <Iyy>2.0494929E-04</Iyy>
+            <Izz>0.0217454</Izz>
+            <Ixy>-7.8453915E-06</Ixy>
+            <Ixz>-1.3062675E-06</Ixz>
+            <Iyz>-1.1791055E-05</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0.0 0.0 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="2" name="Lower Arm">
+        <joint type="R_X" q_initial="-0.45" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.1313765</mass>
+          <com_location>1.56661e-07 0.0801433 -1.28202e-07</com_location>
+          <end_location>0.0 0.2430 0.0</end_location>
+          <inertia ref="com">
+            <Ixx>4.9116366E-04</Ixx>
+            <Iyy>1.9877175E-05</Iyy>
+            <Izz>4.9029819E-04</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>6.5012847E-07</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>1</num>
+          <location>0.0 0.3670 0.0</location>
+        </parent>
+      </link_rigid>
+    </links>
+</bodies_system>

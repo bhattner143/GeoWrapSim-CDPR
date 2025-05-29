@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
+<bodies_system>
+    <links display_range="-0.01 0.01 -0.75 0.75 -0.1 0.75" view_angle="-37 32">
+      <link_rigid num="1" name="Link 1">
+        <joint type="R_X" actuated="true" q_initial="1.2" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.2</mass> <!-- a guess -->
+          <com_location>0.0 0.075 0.0</com_location> <!-- a guess -->
+          <end_location>0.0 0.1 0.0</end_location>
+          <inertia ref="com"> 
+            <Ixx>0.0005</Ixx> <!-- an educated guess, with a 0.1 kg roughly homogeneous rod and a 0.1 kg motor at the end -->
+            <Iyy>0.0000</Iyy>
+            <Izz>0.0005</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0.0 0.0 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="2" name="Link 2">
+        <joint type="R_X" actuated="true" q_initial="-0.4" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.2</mass> <!-- a guess -->
+          <com_location>0.0 0.075 0.0</com_location> <!-- a guess -->
+          <end_location>0.0 0.1 0.0</end_location>
+          <inertia ref="com"> 
+            <Ixx>0.0005</Ixx> <!-- an educated guess, with a 0.1 kg roughly homogeneous rod and a 0.1 kg motor at the end -->
+            <Iyy>0.0000</Iyy>
+            <Izz>0.0005</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>1</num>
+          <location>0.0 0.1 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="3" name="Link 3">
+        <joint type="R_X" actuated="true" q_initial="-0.4" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.2</mass> <!-- a guess -->
+          <com_location>0.0 0.075 0.0</com_location> <!-- a guess -->
+          <end_location>0.0 0.1 0.0</end_location>
+          <inertia ref="com"> 
+            <Ixx>0.0005</Ixx> <!-- an educated guess, with a 0.1 kg roughly homogeneous rod and a 0.1 kg motor at the end -->
+            <Iyy>0.0000</Iyy>
+            <Izz>0.0005</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>2</num>
+          <location>0.0 0.1 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="4" name="Link 4">
+        <joint type="R_X" actuated="true" q_initial="-0.4" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.2</mass> <!-- a guess -->
+          <com_location>0.0 0.075 0.0</com_location> <!-- a guess -->
+          <end_location>0.0 0.1 0.0</end_location>
+          <inertia ref="com"> 
+            <Ixx>0.0005</Ixx> <!-- an educated guess, with a 0.1 kg roughly homogeneous rod and a 0.1 kg motor at the end -->
+            <Iyy>0.0000</Iyy>
+            <Izz>0.0005</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>3</num>
+          <location>0.0 0.1 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="5" name="Link 5">
+        <joint type="R_X" actuated="true" q_initial="-0.4" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.2</mass> <!-- a guess -->
+          <com_location>0.0 0.075 0.0</com_location> <!-- a guess -->
+          <end_location>0.0 0.1 0.0</end_location>
+          <inertia ref="com"> 
+            <Ixx>0.0005</Ixx> <!-- an educated guess, with a 0.1 kg roughly homogeneous rod and a 0.1 kg motor at the end -->
+            <Iyy>0.0000</Iyy>
+            <Izz>0.0005</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>4</num>
+          <location>0.0 0.1 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="6" name="Link 6">
+        <joint type="R_X" actuated="true" q_initial="-0.4" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.2</mass> <!-- a guess -->
+          <com_location>0.0 0.075 0.0</com_location> <!-- a guess -->
+          <end_location>0.0 0.1 0.0</end_location>
+          <inertia ref="com"> 
+            <Ixx>0.0005</Ixx> <!-- an educated guess, with a 0.1 kg roughly homogeneous rod and a 0.1 kg motor at the end -->
+            <Iyy>0.0000</Iyy>
+            <Izz>0.0005</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>5</num>
+          <location>0.0 0.1 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="7" name="Link 7">
+        <joint type="R_X" actuated="true" q_initial="-0.4" q_min="-1.0" q_max="1.0"/>
+        <physical>
+          <mass>0.2</mass> <!-- a guess -->
+          <com_location>0.0 0.075 0.0</com_location> <!-- a guess -->
+          <end_location>0.0 0.1 0.0</end_location>
+          <inertia ref="com"> 
+            <Ixx>0.0005</Ixx> <!-- an educated guess, with a 0.1 kg roughly homogeneous rod and a 0.1 kg motor at the end -->
+            <Iyy>0.0000</Iyy>
+            <Izz>0.0005</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>6</num>
+          <location>0.0 0.1 0.0</location>
+        </parent>
+      </link_rigid>
+    </links>
+</bodies_system>

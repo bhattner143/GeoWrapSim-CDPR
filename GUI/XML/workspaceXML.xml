@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST workspace_condition id ID #REQUIRED>
+]>
+<simulator>
+    <workspace_condition id="WRENCH_CLOSURE"/>
+    <workspace_condition id="WRENCH_FEASIBLE"/>
+    <workspace_condition id="STATIC"/>
+    <workspace_condition id="INTERFERENCE_FREE"/>
+    <workspace_type id="POINT"/>
+    <workspace_type id="RAY"/>
+    <workspace_metrics>
+        <workspace_metric>TENSION_FACTOR</workspace_metric>
+        <workspace_metric>TENSION_FACTOR_MODIFIED</workspace_metric>
+        <workspace_metric>UNILATERAL_DEXTERITY</workspace_metric>
+        <workspace_metric>CAPACITY_MARGIN</workspace_metric>
+        <workspace_metric>CONDITION_NUMBER</workspace_metric>
+        <workspace_metric>SEACM</workspace_metric>
+    </workspace_metrics>    
+    <grid_types>
+        <grid_type>UniformGrid</grid_type>
+    </grid_types>    
+    <plot_functions>
+		<plot_function type="plotWorkspace">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+	</plot_functions>
+</simulator>

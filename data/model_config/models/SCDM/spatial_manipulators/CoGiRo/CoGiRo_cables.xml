@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
+
+<cables default_cable_set="original">
+  <cable_set id="original">
+    <cable_ideal name="cable 1" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-7.1775 -5.4361 5.3911</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.5032 -0.4928 0.0</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-7.4594 -5.1504 5.3999</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.5097 0.3508 0.9976</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-7.3911 5.1940 5.3976</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.5032 -0.2700 0.0</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 4" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-7.1026 5.4753 5.4094</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.4960 0.3561 0.9996</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="cable 5" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>7.2398 5.3759 5.4093</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.5032 0.4928 0.0</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="cable 6" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>7.5208 5.0851 5.4200</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.4998 -0.3404 0.9991</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="cable 7" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>7.4461 -5.2539 5.3874</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.5021 0.2750 -0.0007</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="cable 8" attachment_reference="joint">
+      <properties>
+        <force_min>100.0</force_min>
+        <force_max>5000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>7.1608 -5.5342 5.3973</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.5045 -0.3463 0.9976</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>

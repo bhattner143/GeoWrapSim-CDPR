@@ -1,0 +1,614 @@
+% The simulator to run an inverse dynamics simulation
+%
+% Author        : Dipankar Bhattacharya
+% Created       : 2023
+% Description    :
+%   The cable wrapping inverse dynamics simulator solves for the cable forces required to
+%   perform a prescribed joint space trajectory. The IDSolver is provided
+%   as an input to the simulator to specify the ID algorithm to be used.
+
+% This simulator requires Cable wrapping based CDPR model
+
+% Frame info
+% frame_g:           Ground frame                  Fixed
+% frame_b:           Translated body frame         Varies with q, located at the base center of surface
+% frame_b_dash       Offset body frame             Located at the origin of frame g
+% frame_c            Cable frame                   Varies with pt A, x-axis intersecting A and y-axis coinciding frame_b y-axis
+
+classdef CableWrappingInverseDynamicsSimulator < CableWrappingDynamicsSimulator
+    
+    properties
+        id_info = struct();
+        wrap_model_config_info;
+        lw;
+        ls_norm;
+        ls_hat_b_dash;
+        rB_b_dash;      
+        x_dot; %twist vector not operational space traj velocity
+        
+        q_ref;
+        q_dot_ref;
+        q_ddot_ref;
+        
+        l_dot;
+        q_est_dot;
+        psi_dot;
+        psi_dot_b_dash;
+        lw_dot_b;
+        t;
+        dt;
+
+        x_dot_array;
+        S;
+        P;
+        V;
+        V_m;
+        W;
+        J;
+        J_m;
+        D1;
+        D;
+        D_fk;
+        C;
+        J_beta_dot_q_dot;
+        J_beta_dot_q_dot_fk;
+        J_rB_dot_b_bk_dot
+
+        D_elem;
+
+        beta_all_v_g;
+        beta_all_h_g;
+        beta_all_v_b;
+        beta_all_h_b;
+
+        cableForcesDot;
+
+        % cableWrappedLengths;
+        % cableStraightLengths;
+        % cableStraightLengthIK 
+        % cableLengthTotGeo;
+        % cableLengthIK;
+        % cableStraightLengthDotIK;
+        % cableLengthDotIK;
+
+   
+        cablePtB_b_dash;
+        cablePtB_p;
+        cablePtBDot_p_act;
+        cablePtBDot_b;
+        cablePtBDot_p;
+
+        cablePtBDot_b_dash;
+
+        cableWrappedLengthDotIK;
+        cableLength;
+
+        cableWrappedLengths 
+        cableWrappedLengthsDot
+
+        cableLinkStateChange;
+        cableObstacleStateChange;
+
+        endEffectorPt_g
+        
+        jointTrajectoryRef; 
+        jointTrajectoryRefDot;
+        f_opt;
+
+        cableAngles;
+        cableAngles_b;
+
+        uv_array;
+        bk_array;
+        bk_obs_t_array;
+
+        d_alpha_sB_dt;
+        d_alpha_sB_dt_array;
+        r_dash_GB_b;
+        r_dash_GB_p;
+        psi_dot_r_dash_GB_p;
+        
+        t_ik_time_elapsed_array;
+        t_wrap_opt_time_elapsed_array;
+
+        q_est_dot_array;
+
+        J_t
+        M_t
+        C_t
+        G_t
+    end
+
+    properties (SetAccess = protected)
+        compTime            % computational time for each time step
+        IDFunctionCost      % Cost value for optimisation at each point in time
+        IDExitType          % Exit type at each point in time (IDSolverExitType)
+        IDSolver
+        stiffness           % Cell array of the stiffness matrices at each time instant
+        friction_model      % Friction model
+    end
+
+    methods
+        % Constructor for the inverse dynamics simulator
+        function id = CableWrappingInverseDynamicsSimulator(wrap_model_config, id_solver, lb, ub, friction_model)
+            id@CableWrappingDynamicsSimulator(wrap_model_config);
+            id.IDSolver = id_solver;
+
+            id.lb = lb;
+            id.ub = ub;
+            if nargin < 5
+                id.friction_model = [];
+            else
+                id.friction_model = friction_model; 
+            end
+
+        end
+
+        % Implementation of the run function
+        function run_id(obj, trajectory, view_angle, tol, eta, cable_indices)
+
+            if nargin < 3
+                view_angle = obj.viewAngle;
+            end
+
+            if nargin < 4
+                obj.tol = 0;
+            end
+
+            if nargin < 5
+                obj.eta = 0;
+            end
+
+            if (nargin < 6 || isempty(cable_indices))
+                cable_indices = 1:obj.model.numCables;
+            end
+
+            errorFlag = 0;
+
+            % Runs the simulation over the specified trajector
+            obj.trajectory = trajectory;
+            obj.timeVector = obj.trajectory.timeVector;
+
+            obj.dt         = obj.trajectory.timeStep;
+            
+            %Initialize arrays and cells
+            obj.initializeArraysandCells();
+            
+
+            CASPR_log.Info('Begin inverse dynamics simulator run...');
+
+            for t = 1:length(obj.timeVector)
+                t_ik_time_init = tic;
+
+                obj.t = t;
+                obj.q_ref      = obj.trajectory.q{t};
+                obj.q_dot_ref  = obj.trajectory.q_dot{t};
+                obj.q_ddot_ref = obj.trajectory.q_ddot{t};
+
+                CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
+                % The model is already updated within the resolveCW function
+                
+
+                %% update the cdpr model with new q
+                w_ext = [0,0,0]';
+                obj.model.update(obj.trajectory.q{t}, ...
+                    obj.trajectory.q_dot{t}, ...
+                    obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
+                
+                ik_model_compiled = false;
+                % If the cable to length Jacobian matrix and b opt and kopt
+                % are not available then IK needs to be run in every
+                % iteration to generate them
+                if ik_model_compiled == false
+                    obj.model_config.updateWrappedModel();
+                    %% Run cable wrapping minimization for updating the cdpr model's
+                    tol = 1e-10;
+    
+                    lb = obj.lb;
+                    ub = obj.ub;
+                    % cable part
+                    t_wrap_opt_time_init = tic;
+                    if t ~= 1
+                        obj.run(lb,ub,tol, bopt_prev_array, [], k_opt_prev_array, bkobs_opt_prev_array);
+                    else
+                        obj.run(lb,ub,tol,[]);
+                    end
+                    obj.t_wrap_opt_time_elapsed_array(t,:) = toc(t_wrap_opt_time_init);
+    
+                    obj.id_info(t).optimization_info_q       = obj.optimization_info;
+                    obj.id_info(t).optimization_info_q_angle = obj.optimization_info_with_angle;
+                    obj.id_info(t).cable_info_q              = obj.model_config.cable_info;
+                    obj.id_info(t).frame_info_q              = obj.model_config.frame_info;
+                    obj.id_info(t).surface_param_q           = obj.model_config.surface_param;
+                    obj.id_info(t).obstacle_surface_param_q  = obj.model_config.obstacle_surface_param;
+                    obj.id_info(t).stl_surface_prop_q        = obj.model_config.stl_surface_prop;
+
+                    %% Initialization for next iteration
+                    %Set previous optimum values as initial conditions for
+                    %present optimization
+                    bopt_prev_array  = obj.bopt_array;
+                    k_opt_prev_array = obj.kopt_array;
+    
+                    bkobs_opt_prev_array = obj.bkobs_opt_array;
+    
+                    % Store change in wrapping state
+                    obj.cableLinkStateChange(t,:) =  obj.wrap_info.wrap_state'; 
+                    obj.cableObstacleStateChange(t,:) =  obj.obstacle_detection_info.obstacle_detection_state; 
+                   
+                    if t>1
+                        obj.cableLengths{t}           = obj.cableLengths{t-1}  + obj.dt*obj.l_dot;% computed from l = \int(Jq_dot)  
+                        obj.cableWrappedLengthsDot{t} = (obj.lw - obj.cableWrappedLengths{t-1})/obj.dt;
+                    else
+                        % Geometrical initial length
+                        obj.cableLengths{t}           = obj.ls_norm + obj.lw; % Initial value determined from the geometry
+                        obj.cableWrappedLengthsDot{t} = zeros(4,1);
+                    end
+
+                    % Storing uv
+                    obj.uv_array(t,:) = [obj.model_config.cable_info.cable{1}.uv(end,:),...
+                        obj.model_config.cable_info.cable{2}.uv(end,:),...
+                        obj.model_config.cable_info.cable{3}.uv(end,:),...
+                        obj.model_config.cable_info.cable{4}.uv(end,:)];
+                    
+                    % storing optimized params
+                    % Self-wrapping
+                    obj.bk_array(obj.t,:) = {[obj.bopt_array(1),obj.kopt_array(1)]',...
+                        [obj.bopt_array(2),obj.kopt_array(2)]',...
+                        [obj.bopt_array(3),obj.kopt_array(3)]',...
+                        [obj.bopt_array(4),obj.kopt_array(4)]'};
+                    % Obstacle wrapping
+                    obj.bk_obs_t_array(obj.t,:) = obj.bkobs_opt_array;
+    
+                    else
+                        % If the cable to length Jacobian matrix and b opt and kopt are available
+    
+                    end
+                    %% Run ID solver for obtaining the optimal cable tension   
+                    [forces_active, obj.model, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] =...
+                        obj.IDSolver.resolveCW(obj.trajectory.q{t}, ...
+                        obj.trajectory.q_dot{t},...
+                        obj.trajectory.q_ddot{t},...
+                        zeros(obj.model.numDofs,1), obj.J);
+                    
+                    % Save various simulation parameters
+                    obj.cableForcesActive{t}	=   forces_active;
+                    obj.cableForces{t}          =   obj.model.cableForces;
+                    obj.cableIndicesActive{t}   =   obj.model.cableModel.cableIndicesActive;
+                    obj.interactionWrench{t}    =   obj.model.interactionWrench;
+                    % obj.cableLengths{t}         =   obj.model.cableLengths;
+                    obj.cableLengthsDot{t} = obj.l_dot;
+                    obj.cableWrappedLengths{t}   =  obj.lw;
+
+                    obj.J_t{t} = obj.J;
+                    obj.M_t{t} = obj.model_config.cdpr_model.M;
+                    obj.C_t{t} = obj.model_config.cdpr_model.C;
+                    obj.G_t{t} = obj.model_config.cdpr_model.G;
+                    
+                    % record the stiffness when the system is not in the
+                    % compiled mode
+                    if (obj.model.modelMode ~= ModelModeType.COMPILED && obj.model.modelOptions.isComputeHessian)
+                        obj.stiffness{t}            =   obj.model.K;
+                    end
+                    
+                    if (obj.IDExitType{t} ~= IDSolverExitType.NO_ERROR)
+                        CASPR_log.Warn('No feasible solution for the ID');
+                        errorFlag = 1;
+                    end
+            end
+            
+            if (errorFlag == 1)
+                CASPR_log.Warn('At least one point on the trajectory resulted in no feasible solution for the ID');
+            end
+        end
+        
+        %% Initialize arrays and cells
+        function initializeArraysandCells(obj)
+
+            obj.cableLengths             = cell(1, length(obj.trajectory.timeVector));
+            obj.cableWrappedLengths      = cell(1, length(obj.trajectory.timeVector));
+            obj.cableWrappedLengthsDot   = cell(1, length(obj.trajectory.timeVector));
+
+            obj.cableForces    = cell(1, length(obj.trajectory.timeVector));
+            obj.cableForcesDot = cell(1, length(obj.trajectory.timeVector));
+
+            obj.cablePtB_b_dash          = zeros(length(obj.trajectory.timeVector),12);
+            obj.cablePtB_p               = zeros(length(obj.trajectory.timeVector),12);
+            obj.cablePtBDot_p_act        = zeros(length(obj.trajectory.timeVector),12);
+            obj.cablePtBDot_b            = zeros(length(obj.trajectory.timeVector),12);
+            obj.cablePtBDot_p            = zeros(length(obj.trajectory.timeVector),12);
+
+            obj.endEffectorPt_g          = zeros(length(obj.trajectory.timeVector),3);
+
+            obj.cablePtBDot_b_dash       = zeros(length(obj.trajectory.timeVector),12);
+            
+            obj.cableLinkStateChange     = zeros(length(obj.trajectory.timeVector),4);
+            obj.cableObstacleStateChange = zeros(length(obj.trajectory.timeVector),4);
+
+            obj.jointTrajectoryRef       = zeros(length(obj.trajectory.timeVector),4);
+            obj.jointTrajectoryRefDot    = zeros(length(obj.trajectory.timeVector),4);
+
+            obj.x_dot_array              = zeros(length(obj.trajectory.timeVector),obj.model.bodyModel.numLinks*6);
+
+            obj.D_elem                   = zeros(length(obj.trajectory.timeVector),4); 
+
+            obj.uv_array                 = zeros(length(obj.trajectory.timeVector),16);
+            obj.bk_array                 = cell(length(obj.trajectory.timeVector),4);
+            obj.bk_obs_t_array           = cell(length(obj.trajectory.timeVector),4);
+
+            obj.t_ik_time_elapsed_array       = zeros(length(obj.trajectory.timeVector),1);
+            obj.t_wrap_opt_time_elapsed_array = zeros(length(obj.trajectory.timeVector),1);
+
+            obj.q_est_dot_array               = zeros(length(obj.trajectory.timeVector),3);
+            
+            obj.wrap_model_config_info        = cell(1, length(obj.trajectory.timeVector));
+            
+            % Existing initilizations
+            obj.cableIndicesActive = cell(1, length(obj.trajectory.timeVector));
+            
+            % record the stiffness
+            obj.stiffness = cell(1, length(obj.trajectory.timeVector));
+
+            obj.IDFunctionCost = zeros(length(obj.timeVector), 1);
+            obj.IDExitType = cell(length(obj.timeVector), 1);
+
+            obj.compTime = zeros(length(obj.timeVector), 1);
+
+            %record Jacobian, Mass , Coriallis and Gravity
+            obj.J_t = cell(1, length(obj.trajectory.timeVector));
+            obj.M_t = cell(1, length(obj.trajectory.timeVector));
+            obj.C_t = cell(1, length(obj.trajectory.timeVector));
+            obj.G_t = cell(1, length(obj.trajectory.timeVector));
+        end
+
+        % Plots the cost associated with the ID solver (for solvers that
+        % aim to minimise some objective cost).
+        function plotIDCost(obj,plot_axis)
+            if(nargin == 1 || isempty(plot_axis))
+                figure;
+                plot(obj.timeVector, obj.IDFunctionCost, 'LineWidth', 1.5, 'Color', 'k');
+                title('ID function cost');
+            else
+                plot(plot_axis,obj.timeVector, obj.IDFunctionCost, 'LineWidth', 1.5, 'Color', 'k');
+            end
+        end
+
+        % Plots the cost associated with the ID solver (for solvers that
+        % aim to minimise some objective cost).
+        function output_data = extractData(obj)
+            output_data.K           =   obj.stiffness;
+            output_data.cableForces	=   obj.cableForces;
+        end
+        %% Compute Straight cable length unit vector
+        function ls_hat_b_dash = get.ls_hat_b_dash(obj)            
+            cable_indices = [1 2 3 4];
+            ls_hat_b_dash = zeros(3,length(cable_indices));
+            
+            % Loop through the cables
+            for cable_index = cable_indices
+                switch obj.optimization_info(cable_index).wrapping_case
+                    case 'self_wrapping'
+                        PB_unit_b_dash               = obj.model_config.T_b_dash_b*(-obj.optimization_info(cable_index).optParam.BP_unit_b);
+                        
+                        ls_hat_b_dash_dummy          = PB_unit_b_dash;% vector in opposite direction
+                        ls_hat_b_dash(:,cable_index) = ls_hat_b_dash_dummy(1:3);
+                    case 'obstacle_wrapping'
+                        CA_unit_o = -[obj.optimization_info(cable_index).optParamObstacle.AC_unit_o',0]';
+                        T_b_o     = obj.model_config.frame_info.Obstacles.TransformationMatrices.T_b_o;  
+                        CA_unit_b_dash = obj.model_config.T_b_dash_b*T_b_o*CA_unit_o;
+
+                        ls_hat_b_dash_dummy          = CA_unit_b_dash;
+                        ls_hat_b_dash(:,cable_index) = ls_hat_b_dash_dummy(1:3);
+                    case 'no_wrapping'
+                        PB_unit_b_dash               = obj.model_config.T_b_dash_b*(-obj.optimization_info(cable_index).optParam.BP_unit_b);
+                        
+                        ls_hat_b_dash_dummy          = PB_unit_b_dash;% vector in opposite direction
+                        ls_hat_b_dash(:,cable_index) = ls_hat_b_dash_dummy(1:3);
+                end
+            end
+        end
+        % Compute pt B vector from frame b_dash
+        function rB_b_dash = get.rB_b_dash(obj)            
+            cable_indices = [1 2 3 4];
+            rB_b_dash = zeros(3,length(cable_indices));
+
+            % Loop through the cables
+            for cable_index = cable_indices
+                rB_b_dash_dummy = obj.model_config.T_b_dash_b*obj.optimization_info(cable_index).optParam.B_b;
+                rB_b_dash(:,cable_index) = rB_b_dash_dummy(1:3); % Calculated from center of frame g where frame b_dash lies
+            end
+        end
+        %%
+        function S = get.S(obj)
+            S = obj.model.bodyModel.S(1:6,1:3);
+        end
+        function P = get.P(obj)
+            rG_b_dash = inv(obj.model_config.frame_info.Links.TransformationMatrices{1, 1}.T_b_b_dash)*[obj.model_config.surface_param.rG_b' 1]';         
+            
+            R_m_b_dash = eye(3,3); %Since frame m and frame b_dash have same orientation      
+            rG_m       = R_m_b_dash*rG_b_dash(1:3);
+            rG_m_skew  = MatrixOperations.SkewSymmetric(rG_m);
+       
+            %inertial frame to b_dash frame Rotation matrix
+            R_b_dash_g     = obj.model_config.frame_info.Links.TransformationMatrices{1, 1}.T_b_dash_g(1:3,1:3);
+
+            P  = [R_b_dash_g -rG_m_skew;zeros(3,3) eye(3,3)]; % Darwin's thesis, Eq. 5.17
+        end
+
+        function W = get.W(obj)
+            W = obj.P*obj.S; % Darwin's thesis, Eq. 5.18
+        end
+
+        function V = get.V(obj)
+            % For link 1 and four cables
+            % rB_b_dash is calculated from center of the frame g ie frame
+            % b_dash
+            V = [obj.ls_hat_b_dash' cross(obj.rB_b_dash,obj.ls_hat_b_dash)'];
+        end
+
+        % V matrix wrt frame m
+        function V_m = get.V_m(obj)
+            T_m_bdash = obj.model_config.frame_info.Links.TransformationMatrices{1, 1}.T_m_b*...
+                            obj.model_config.frame_info.Links.TransformationMatrices{1, 1}.T_b_b_dash;  
+            ls_hat_m = T_m_bdash*[obj.ls_hat_b_dash' zeros(4,1)]';
+            ls_hat_m = ls_hat_m(1:3,:);
+
+            T_m_bdash = obj.model_config.frame_info.Links.TransformationMatrices{1, 1}.T_m_b*...
+                            obj.model_config.frame_info.Links.TransformationMatrices{1, 1}.T_b_b_dash;  
+            rB_m = T_m_bdash*[obj.rB_b_dash' ones(4,1)]';
+            rB_m = rB_m(1:3,:);
+    
+            V_m =[ls_hat_m' cross(rB_m,ls_hat_m)'];
+        end
+
+        % Jacobian for l_dot wrt q_dot
+        function J = get.J(obj)
+            %For link 1 and four cables
+            J = obj.V*obj.S; 
+        end
+
+        % Jacobian for l_dot wrt q_dot determined wrt frame m
+        function J_m = get.J_m(obj)
+            %For link 1 and four cables
+            J_m = obj.V_m*obj.W; 
+        end
+        %% Compute Straight cable length
+        function ls_norm = get.ls_norm(obj)            
+            cable_indices = [1 2 3 4];
+            ls_norm = zeros(length(cable_indices),1);
+            
+            % Loop through the cables
+            for cable_index = cable_indices
+                switch obj.optimization_info(cable_index).wrapping_case
+                    case 'self_wrapping'
+                        ls_norm(cable_index) = norm(obj.optimization_info(cable_index).optParam.P_b(1:3) - obj.optimization_info(cable_index).optParam.B_b(1:3));
+                    case 'obstacle_wrapping'
+                        ls_norm(cable_index) = norm(obj.optimization_info(cable_index).optParamObstacle.P_o(1:3) - obj.optimization_info(cable_index).optParamObstacle.D_o(1:3)) + ...
+                            norm(obj.optimization_info(cable_index).optParamObstacle.C_o(1:3) - obj.optimization_info(cable_index).optParamObstacle.A_o(1:3)); 
+                    case 'no_wrapping'
+                        ls_norm(cable_index) = norm(obj.optimization_info(cable_index).optParam.P_b(1:3) - obj.optimization_info(cable_index).optParam.B_b(1:3)); %Since B_b and A_b coincides
+                end
+            end       
+        end
+        %% Compute wrapped cable length
+        % determined wrt frame b
+        function lw = get.lw(obj)
+
+            cable_indices = [1 2 3 4];
+            lw = zeros(length(cable_indices),1);
+
+            % Loop through the cables
+            for cable_index = cable_indices
+                switch obj.optimization_info(cable_index).wrapping_case
+                    case 'self_wrapping'
+                        param   = obj.model_config.cable_info.cable{cable_index}.helixParams;
+
+                        bopt   = obj.optimization_info(cable_index).bopt;
+                        kopt   = obj.optimization_info(cable_index).kopt;
+    
+                        [alpha_t_b,  ~, ~] = obj.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+                    
+                        % Get helix params
+                        
+                        dalpha1_k = diff(alpha_t_b(:,1));
+                        dalpha2_k = diff(alpha_t_b(:,2));
+                        dalpha3_k = diff(alpha_t_b(:,3));
+            
+                        lw(cable_index) = sum(sqrt(dalpha1_k.^2 + dalpha2_k.^2 + dalpha3_k.^2)); % Arc length. Linear aprox. 
+
+                    case 'obstacle_wrapping'
+                        param   = obj.model_config.cable_info.cable{cable_index}.obsHelixParams;
+
+                        bk_obs  = obj.optimization_info(cable_index).bk_obs;
+    
+                        [alpha_t_o,  ~, ~] = obj.model_config.GenObstacleNumCompHelixCurve(param, bk_obs);
+                    
+                        % Get helix params                     
+                        dalpha1_k = diff(alpha_t_o(:,1));
+                        dalpha2_k = diff(alpha_t_o(:,2));
+                        dalpha3_k = diff(alpha_t_o(:,3));
+            
+                        lw(cable_index) = sum(sqrt(dalpha1_k.^2 + dalpha2_k.^2 + dalpha3_k.^2)); % Arc length. Linear aprox. 
+
+                    case 'no_wrapping'
+                        param   = obj.model_config.cable_info.cable{cable_index}.helixParams;
+
+                        bopt   = obj.optimization_info(cable_index).bopt;
+                        kopt   = obj.optimization_info(cable_index).kopt;
+    
+                        [alpha_t_b,  ~, ~] = obj.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+                    
+                        % Get helix params
+                        
+                        dalpha1_k = diff(alpha_t_b(:,1));
+                        dalpha2_k = diff(alpha_t_b(:,2));
+                        dalpha3_k = diff(alpha_t_b(:,3));
+            
+                        lw(cable_index) = sum(sqrt(dalpha1_k.^2 + dalpha2_k.^2 + dalpha3_k.^2)); % Arc length. Linear aprox. 
+                end
+            end 
+        end
+
+        %% Length dot calculated from the Jacobian
+        function l_dot = get.l_dot(obj)
+            l_dot = obj.J* obj.q_dot_ref(1:3);
+        end
+        % IK based lw dot
+        function lw_dot_b = get.lw_dot_b(obj)
+                
+            lw_dot_b = zeros(4,1);
+            dt = obj.dt;
+
+            cable_indices  = [1,2,3,4];
+            for cable_index = cable_indices     
+                bopt = obj.bopt_array(cable_index);
+                kopt = obj.kopt_array(cable_index);
+            
+                if obj.t ~= 1
+                    d_bopt_cable_index = bopt - obj.bk_array(obj.t-1,2*cable_index-1);  
+                    d_kopt_cable_index = kopt - obj.bk_array(obj.t-1,2*cable_index);  
+                
+                else
+                    bopt_prev = obj.bopt_array(cable_index);
+                    kopt_prev = obj.kopt_array(cable_index);
+            
+                    d_bopt_cable_index = bopt - bopt_prev;
+                    d_kopt_cable_index = kopt - kopt_prev;
+            
+                end
+            
+                d_alpha_b_b_sB = obj.model_config.cable_info.cable{cable_index}.d_alpha_b_b_sB;
+                d_alpha_k_b_sB = obj.model_config.cable_info.cable{cable_index}.d_alpha_k_b_sB;
+            
+                r_dash_GB_b = d_alpha_b_b_sB*d_bopt_cable_index/obj.dt +...
+                                                        d_alpha_k_b_sB*d_kopt_cable_index/obj.dt;  
+                
+                ls_hat_b = -obj.optimization_info(cable_index).optParam.BP_unit_b;
+                lw_dot_b(cable_index) = ls_hat_b(1:3)'*r_dash_GB_b; 
+            end
+        end
+        %%
+        % Plots the left and right sides of the EoM to show whether the
+        % solution matches the desired EoM.
+        function verifyEoMConstraint(obj, plot_axis)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot verify the EoM since trajectory is empty');
+            CASPR_log.Assert(~isempty(obj.cableForces), 'Cannot verify the EoM since trajectory is empty');
+
+            w_left = zeros(obj.model.numDofs, length(obj.timeVector));
+            w_right = zeros(obj.model.numDofs, length(obj.timeVector));
+
+            for t = 1:length(obj.timeVector)
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                w_left(:,t) = obj.model.M*obj.model.q_ddot + obj.model.C + obj.model.G;
+                w_right(:,t) = -obj.model.L'*obj.cableForces{t};
+            end
+
+            if nargin <= 1 || isempty(plot_axis)
+                figure; plot(obj.timeVector, w_left, 'LineWidth', 1.5, 'Color', 'k'); title('ID verify w left hand side');
+                figure; plot(obj.timeVector, w_right, 'LineWidth', 1.5, 'Color', 'k'); title('ID verify w right hand side');
+            else
+                plot(plot_axis(1), obj.timeVector, w_left, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis(2), obj.timeVector, w_right, 'LineWidth', 1.5, 'Color', 'k');
+            end
+        end
+    end
+end

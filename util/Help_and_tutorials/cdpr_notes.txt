@@ -1,0 +1,56 @@
+RMSE x axis = 4.11e-03 m
+RMSE y axis = 1.59e-02 m
+RMSE z axis = 8.30e-03 m
+
+
+x 2
+y 0.6 1.6
+z
+
+Spider Arm                       Fastkit
+q-->12
+q_CDPr-->6
+q_robot_loink-->6
+
+cables-->8
+joints-->6
+
+x-->6
+
+Spider
+
+n_cables=m=8
+n_cdpr_jt=n_tilde=6 i.e. q_tilde
+
+n_actuators=p=6 i.e q_a
+n_dofs=n_cdpr_jt+n_actuators
+n     =  n_tilde+ p         =6+6=12
+
+
+L-->mxn=8x12
+L'-->12x8
+
+l_dot=L x q_dot
+8x1=8x12   12x1
+
+A-->nxp=12x6
+N-->nx(m+p)=12x14
+
+Fastkit
+
+n_cables=m=4
+n_cdpr_jt=n_tilde=3 i.e. q_tilde
+
+n_actuators=p=4 i.e q_a
+n_dofs=n_cdpr_jt+n_actuators
+n     =  n_tilde+ p         =3+4=7
+
+
+L-->mxn=4x7
+L'-->7x4
+
+l_dot=L x q_dot
+4x1=4x7   7x1
+
+A-->nxp=7x4
+N-->nx(m+p)=7x8
