@@ -1,0 +1,994 @@
+% Basic Inverse Dynamics solver for problems in the Quadratic Program form
+% This is a well-studied form of inverse dynamics solver for CDPRs.
+%
+% Author        : Dipankar Bhattacharya
+% Created       : 2023
+% Description   : Only a quadratic objective function and linear
+% constraints can be used with this solver. There are multiple types of QP
+% solver implementations that can be used with this solver.
+classdef CWGFrictionModelBezierSurfs < CWGFrictionModelBase
+
+    properties (SetAccess = private)
+        ik_model;
+        fmincon_solver_type
+        objective
+        constraints = {}
+        options
+        is_OptiToolbox
+        timeVector
+    end
+
+    properties (Constant)
+        options_fm = optimoptions('fmincon',...
+                        'Display','off',...
+                        'Algorithm','interior-point',...
+                        'StepTolerance',1e-6,...
+                        'OptimalityTolerance',1e-4,....
+                        'FunctionTolerance',1e-4,...
+                        'UseParallel',false);
+
+        lb_biarc = [-5,       -5,      -5,   -5;
+                    -5,       -5,      -5,   -5;
+                    -5,       -5,      -5,   -5
+                    -5,       -5,      -5,   -5];        
+        ub_biarc = [10,     10,        10,    10;
+                    10,     10,        10,    10;
+                    10,     10,        10,    10;
+                    10,     10,        10,    10];
+
+        % Inequality linear constraints
+        A = [];
+        b = [];
+        % Equality linear constraints
+        Aeq = [];
+        beq = [];
+        nonlcon = [];
+
+        plot_biarc = true;
+
+        mu         = 0.3;
+        sig        = [1000 100 100000 100000]';
+    end
+    
+    properties
+        biarc_interpolation_info    = struct();
+        coulomb_cable_friction_info = struct();
+    end
+
+    methods
+        % The contructor for the class.
+        function fm = CWGFrictionModelBezierSurfs(model, ik_model)
+            fm@CWGFrictionModelBase(model);
+            if nargin < 2
+                fm.ik_model = [];
+            else
+                fm.ik_model = ik_model;
+            end
+        end
+        
+        %Perform biarc interpolation
+        function computeBiarcsForCWG(fm, wrapping_case, u0_all, bk_p, bk_obs_p)
+            % Set default initial guess for optimization variables if not provided
+            if nargin < 3 || isempty(u0_all)
+                u0_all = (fm.lb_biarc + fm.ub_biarc)/2;
+            end
+            
+            % Loop over each actuator/cable
+            for cable_index = 1:fm.model.model.numActuators  
+               % if strcmp(wrapping_case{cable_index},'self_wrapping')
+               %     cwg = fm.model.model_config.cable_info.cable{cable_index}.cable_wrapping_curve.alpha_val_c_b;
+               % elseif strcmp(wrapping_case{cable_index},'obstacle_wrapping')
+               %     cwg = fm.model.model_config.cable_info.cable{cable_index}.obstacle_cable_wrapping_curve.alpha_val_obs_o;
+               % else
+               %     cwg = fm.model.model_config.cable_info.cable{cable_index}.cable_wrapping_curve.alpha_val_c_b;
+               % end
+
+               switch wrapping_case{cable_index}
+                    case 'self_wrapping'
+                        % Get optimized parameters for 'self_wrapping' case
+                        bopt = bk_p{cable_index}(1);
+                        kopt = bk_p{cable_index}(2);
+                        
+                        % Get helix parameters for the cable
+                        param = fm.model.model_config.cable_info.cable{cable_index}.helixParams;
+
+                        % Generate numerical composite helix curve
+                        [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+                        
+                    % Generate numerical composite helix curve
+                [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+
+                case 'obstacle_wrapping'
+                    % Get optimized parameters for obstacle wrapping
+                    bk_obs_opt = bk_obs_p{cable_index};
+    
+                    % Get obstacle helix parameters for the cable
+                    param = fm.model.model_config.cable_info.cable{cable_index}.obsHelixParams;
+    
+                    % Check the surface name and generate obstacle helix curve accordingly
+                    if strcmp(fm.model.model_config.obsHelixParams.obstacle_surface_param.surface_name, 'nurbs_and_bezier')
+                        [cwg, ~] = fm.model.model_config.model_geodesic.GenObstacleNumCompHelixCurve(param, bk_obs_opt);
+                    else
+                        [cwg, ~, ~] = fm.model.model_config.GenObstacleNumCompHelixCurve(param, bk_obs_opt);
+                    end
+    
+                case 'no_wrapping'
+                    % No wrapping case, but still computing cwg
+                    bopt = bk_p{cable_index}(1);
+                    kopt = bk_p{cable_index}(2);
+    
+                    % Get helix parameters for the cable
+                    param = fm.model.model_config.cable_info.cable{cable_index}.helixParams;
+    
+                    % Generate numerical composite helix curve
+                    [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+    
+                case 'multi_wrapping'
+                    % Handle 'multi_wrapping' case
+                    for i = 2:length(fm.model.wrap_optimizer_with_gen_int_det.object_connection_map)-1
+                        object_connection_map = fm.model.wrap_optimizer_with_gen_int_det.object_connection_map;
+                        % Additional code needed here to handle multi_wrapping
+                        % Implement the logic for multi_wrapping as required
+                    end
+                otherwise
+                    error('Unknown wrapping case: %s', wrapping_case{cable_index});
+            end
+
+            
+            % cwg projection on the xz plane
+               cwg_proj_xz          = cwg(:,[1,3]);
+               
+               if strcmp(wrapping_case{cable_index},'self_wrapping')||strcmp(wrapping_case{cable_index},'obstacle_wrapping')
+                    
+                    % Define objective function for optimization
+                    objfun = @(u)fm.ObjFuncForBiarcInterpolation(u, cwg_proj_xz);
+                    u0 = u0_all(cable_index,:);
+                    
+                    % Biarc interpolation 
+                    % Optimization to determine the u^\star
+                    try
+                        [u, fval, exitflag, output] = fmincon(objfun,u0,fm.A,fm.b,fm.Aeq,fm.beq,...
+                            fm.lb_biarc(cable_index,:), fm.ub_biarc(cable_index,:), fm.nonlcon, fm.options_fm);
+                    catch
+                        % If optimization fails, reset initial guess and try again
+                        u0 = (fm.lb_biarc(cable_index,:) + fm.ub_biarc(cable_index,:))/2;
+                        [u, fval, exitflag, output] = fmincon(objfun,u0,fm.A,fm.b,fm.Aeq,fm.beq,...
+                            fm.lb_biarc(cable_index,:), fm.ub_biarc(cable_index,:), fm.nonlcon, fm.options_fm);
+                    end
+                    
+                    % Define control points for the biarc spline
+                    % Assuming 100 points along cwg_proj_xz 
+                    p     = [cwg_proj_xz(1,1) cwg_proj_xz(100,1); cwg_proj_xz(1,2) cwg_proj_xz(100,2)];  
+                    
+                    % Create a biarc spline curve using the control points and optimized parameters
+                    biarc = rscvn(p,reshape(u,[2,2])'); breaks = fnbrk(biarc,'b');
+                    
+                    % Compute the derivative (tangent) vectors at the spline breakpoints
+                    vd = fntlr(biarc,2,breaks);
+
+                    %Control and intersection point
+                    ctrl_pt1 = vd(1:2,1);
+                    int_pt   = vd(1:2,2);
+                    ctrl_pt2 = vd(1:2,3);
+                    
+                    % tangent vectors
+                    t_ctrl_pt1 = vd(3:4,1);
+                    t_int_pt   = vd(3:4,2);
+                    t_ctrl_pt2 = vd(3:4,3);
+                    
+                    % unit tangent vectors
+                    t_ctrl_pt1_unit = t_ctrl_pt1/norm(vd(3:4,1));
+                    t_int_pt_unit   = t_int_pt/norm(vd(3:4,2));
+                    t_ctrl_pt2_unit = t_ctrl_pt2/norm(vd(3:4,3));  
+                    
+                    % normal vectors (Any direction is fine)
+                    n_ctrl_pt1 = [vd(4,1) -vd(3,1)]';
+                    n_int_pt   = [vd(4,2) -vd(3,2)]';
+                    n_ctrl_pt2 = [vd(4,3) -vd(3,3)]';
+                    
+                    % Center
+                    s1 = ((int_pt - ctrl_pt1)'*(int_pt - ctrl_pt1))/(2*n_ctrl_pt1'*(int_pt - ctrl_pt1));
+                    s2 = ((int_pt - ctrl_pt2)'*(int_pt - ctrl_pt2))/(2*n_ctrl_pt2'*(int_pt - ctrl_pt2));
+                    
+                    c1 = ctrl_pt1 + s1.*n_ctrl_pt1;
+                    c2 = ctrl_pt2 + s2.*n_ctrl_pt2;
+                    
+                    %circle 1
+                    C1P1   = ctrl_pt1 - c1;
+                    C1Pint = int_pt   - c1;
+                    r1     = norm(C1P1);
+                    theta1 = acos((C1P1'*C1Pint)/(norm(C1P1)*norm(C1Pint)));
+                    
+                    %circle 2
+                    C2P2   = ctrl_pt2 - c2;
+                    C2Pint = int_pt   - c2;
+                    r2     =  norm(C2P2);
+                    theta2 = acos((C2P2'*C2Pint)/(norm(C2P2)*norm(C2Pint)));%save the biarc interpolation info
+
+                    fm.biarc_interpolation_info(cable_index).cable_index       = cable_index;
+                    fm.biarc_interpolation_info(cable_index).cwg               = cwg;
+                    fm.biarc_interpolation_info(cable_index).wrapping_case     = wrapping_case{cable_index};
+                    fm.biarc_interpolation_info(cable_index).u      = u;
+                    fm.biarc_interpolation_info(cable_index).vd     = vd;
+                    fm.biarc_interpolation_info(cable_index).fval   = fval;
+                    fm.biarc_interpolation_info(cable_index).output = output;
+                    fm.biarc_interpolation_info(cable_index).biarc  = biarc;
+                    fm.biarc_interpolation_info(cable_index).vec_ctrl_pts         = [ctrl_pt1 int_pt ctrl_pt2];
+                    fm.biarc_interpolation_info(cable_index).vec_tan_origin_direc = vd;
+                    fm.biarc_interpolation_info(cable_index).vec_unit_tan = [t_ctrl_pt1_unit t_int_pt_unit t_ctrl_pt2_unit];
+                    fm.biarc_interpolation_info(cable_index).vec_normal   = [n_ctrl_pt1/norm(n_ctrl_pt1) n_int_pt/norm(n_int_pt) n_ctrl_pt2/norm(n_ctrl_pt1)];
+                    
+                    fm.biarc_interpolation_info(cable_index).vec_center   = [c1 c2];
+                    fm.biarc_interpolation_info(cable_index).r            = [r1 r2]';
+                    fm.biarc_interpolation_info(cable_index).theta        = [theta1 theta2];
+                
+                    % fm.biarc_interpolation_info(cable_index).beta1 = beta1;
+                    % fm.biarc_interpolation_info(cable_index).beta2 = beta2;
+                    % fm.biarc_interpolation_info(cable_index).mf = mf;
+                    % fm.biarc_interpolation_info(cable_index).l_wrapped = l(t+2, cable_index);
+                    % fm.biarc_interpolation_info(cable_index).l_wrapped_dot = v(t+2, cable_index);
+                    % fm.biarc_interpolation_info(cable_index).f_id = f_id; % ID cable force
+                    % fm.biarc_interpolation_info(cable_index).f_A  = f_A;  % Cable force required at point A
+                    % fm.biarc_interpolation_info(cable_index).f_f  = f_A - f_id; % Coulomb's friction
+                    % 
+                    % fm.biarc_interpolation_info(cable_index).fD  = fD(t,cable_index); 
+               else % In case there is no wrapping
+                   u0 = u0_all(cable_index,:);
+                   u  = u0;
+                   
+                   fm.biarc_interpolation_info(cable_index).cable_index       = cable_index;
+                   fm.biarc_interpolation_info(cable_index).cwg               = cwg;
+                   fm.biarc_interpolation_info(cable_index).wrapping_case     = wrapping_case{cable_index};
+                   fm.biarc_interpolation_info(cable_index).u                 = u;
+                   fm.biarc_interpolation_info(cable_index).theta             = [0 0];
+                   fm.biarc_interpolation_info(cable_index).fval              = 0;
+                   fm.biarc_interpolation_info(cable_index).r                 = [0 0]';
+               end 
+           
+               
+            end
+            %Plot biarcs
+            if fm.plot_biarc
+                fm.plotBiarc([1 2 3]);
+            end
+        end
+
+        % Perform biarc interpolation in 3D
+        function computeBiarcsFor3dCWG(fm, wrapping_case, u0_all, bk_p, bk_obs_p)
+            % Set default initial guess for optimization variables if not provided
+            if nargin < 3 || isempty(u0_all)
+                u0_all = zeros(fm.model.model.numActuators, 6); % For 3D tangents at start and end
+            end
+        
+            % Loop over each actuator/cable
+            for cable_index = 1:fm.model.model.numActuators
+                % Determine the wrapping case and compute the cable wrapping geometry (cwg)
+                switch wrapping_case{cable_index}
+                    case 'self_wrapping'
+                        % Get optimized parameters for 'self_wrapping' case
+                        bopt = bk_p{cable_index}(1);
+                        kopt = bk_p{cable_index}(2);
+                        
+                        % Get helix parameters for the cable
+                        param = fm.model.model_config.cable_info.cable{cable_index}.helixParams;
+
+                        % Generate numerical composite helix curve
+                        [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+                        
+                    % Generate numerical composite helix curve
+                    [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+    
+                    case 'obstacle_wrapping'
+                        % Get optimized parameters for obstacle wrapping
+                        bk_obs_opt = bk_obs_p{cable_index};
+        
+                        % Get obstacle helix parameters for the cable
+                        param = fm.model.model_config.cable_info.cable{cable_index}.obsHelixParams;
+        
+                        % Check the surface name and generate obstacle helix curve accordingly
+                        if strcmp(fm.model.model_config.obsHelixParams.obstacle_surface_param.surface_name, 'nurbs_and_bezier')
+                            [cwg, ~] = fm.model.model_config.model_geodesic.GenObstacleNumCompHelixCurve(param, bk_obs_opt);
+                        else
+                            [cwg, ~, ~] = fm.model.model_config.GenObstacleNumCompHelixCurve(param, bk_obs_opt);
+                        end
+        
+                    case 'no_wrapping'
+                        % No wrapping case, but still computing cwg
+                        bopt = bk_p{cable_index}(1);
+                        kopt = bk_p{cable_index}(2);
+                        
+                        % Get helix parameters for the cable
+                        param = fm.model.model_config.cable_info.cable{cable_index}.helixParams;
+        
+                        % Generate numerical composite helix curve
+                        [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+        
+                    case 'multi_wrapping'
+                        % Handle 'multi_wrapping' case
+                        for i = 2:length(fm.model.wrap_optimizer_with_gen_int_det.object_connection_map)-1
+                            object_connection_map = fm.model.wrap_optimizer_with_gen_int_det.object_connection_map;
+                            % Additional code needed here to handle multi_wrapping
+                            % Implement the logic for multi_wrapping as required
+                        end
+                    otherwise
+                        error('Unknown wrapping case: %s', wrapping_case{cable_index});     
+                end
+        
+                % Use full 3D cwg data
+                cwg_full = cwg(:, 1:3);
+        
+                % Check if wrapping is either 'self_wrapping' or 'obstacle_wrapping'
+                if strcmp(wrapping_case{cable_index}, 'self_wrapping') || strcmp(wrapping_case{cable_index}, 'obstacle_wrapping')
+                    % Define objective function for optimization in 3D
+                    objfun = @(u) fm.ObjFuncFor3dBiarcInterpolation(u, cwg_full);
+        
+                    % Initial guess for u
+                    u0 = u0_all(cable_index, :)';
+        
+                    % Perform optimization to find the best biarc parameters in 3D
+                    % Ensure bounds and constraints are defined appropriately
+                    try
+                        [u, fval, exitflag, output] = fmincon(objfun, u0, ...
+                            fm.A, fm.b, fm.Aeq, fm.beq, fm.lb_biarc(cable_index, :)', ...
+                            fm.ub_biarc(cable_index, :)', fm.nonlcon, fm.options_fm);
+                    catch
+                        % If optimization fails, reset initial guess and try again
+                        u0 = zeros(6, 1); % Or another appropriate initial guess
+                        [u, fval, exitflag, output] = fmincon(objfun, u0, ...
+                            fm.A, fm.b, fm.Aeq, fm.beq, fm.lb_biarc(cable_index, :)', ...
+                            fm.ub_biarc(cable_index, :)', fm.nonlcon, fm.options_fm);
+                    end
+        
+                    % Define control points for the biarc spline in 3D
+                    p = [cwg_full(1, :)', cwg_full(end, :)'];
+        
+                    % Create a biarc spline curve using the control points and optimized parameters
+                    biarc = rscvn(p, reshape(u, [3, 2])');
+                    breaks = fnbrk(biarc, 'b');
+        
+                    % Compute the derivative (tangent) vectors at the spline breakpoints
+                    vd = fntlr(biarc, 2, breaks); % vd will be 6 x n
+        
+                    % Extract control points and intersection point
+                    ctrl_pt1 = vd(1:3, 1);
+                    int_pt   = vd(1:3, 2);
+                    ctrl_pt2 = vd(1:3, 3);
+        
+                    % Extract tangent vectors at control points
+                    t_ctrl_pt1 = vd(4:6, 1);
+                    t_int_pt   = vd(4:6, 2);
+                    t_ctrl_pt2 = vd(4:6, 3);
+        
+                    % Compute unit tangent vectors at control points
+                    t_ctrl_pt1_unit = t_ctrl_pt1 / norm(t_ctrl_pt1);
+                    t_int_pt_unit   = t_int_pt   / norm(t_int_pt);
+                    t_ctrl_pt2_unit = t_ctrl_pt2 / norm(t_ctrl_pt2);
+        
+                    % Compute normal vectors at control points using cross products
+                    n_ctrl_pt1 = cross(t_ctrl_pt1_unit, (int_pt - ctrl_pt1));
+                    n_int_pt   = cross(t_int_pt_unit, (ctrl_pt2 - int_pt));
+                    n_ctrl_pt2 = cross(t_ctrl_pt2_unit, (int_pt - ctrl_pt2));
+        
+                    % Normalize normal vectors
+                    n_ctrl_pt1_unit = n_ctrl_pt1 / norm(n_ctrl_pt1);
+                    n_int_pt_unit   = n_int_pt   / norm(n_int_pt);
+                    n_ctrl_pt2_unit = n_ctrl_pt2 / norm(n_ctrl_pt2);
+        
+                    % Compute centers of the arcs in 3D
+                    s1 = ((int_pt - ctrl_pt1)' * (int_pt - ctrl_pt1)) / (2 * (n_ctrl_pt1_unit' * (int_pt - ctrl_pt1)));
+                    s2 = ((int_pt - ctrl_pt2)' * (int_pt - ctrl_pt2)) / (2 * (n_ctrl_pt2_unit' * (int_pt - ctrl_pt2)));
+        
+                    c1 = ctrl_pt1 + s1 * n_ctrl_pt1_unit;
+                    c2 = ctrl_pt2 + s2 * n_ctrl_pt2_unit;
+        
+                    % Compute radii and angles of the arcs
+                    % Circle 1
+                    C1P1   = ctrl_pt1 - c1;
+                    C1Pint = int_pt   - c1;
+                    r1     = norm(C1P1);
+                    theta1 = acos(dot(C1P1, C1Pint) / (norm(C1P1) * norm(C1Pint)));
+        
+                    % Circle 2
+                    C2P2   = ctrl_pt2 - c2;
+                    C2Pint = int_pt   - c2;
+                    r2     = norm(C2P2);
+                    theta2 = acos(dot(C2P2, C2Pint) / (norm(C2P2) * norm(C2Pint)));
+        
+                    % Save the biarc interpolation information into the 'fm' structure
+                    fm.biarc_interpolation_info(cable_index).cable_index           = cable_index;
+                    fm.biarc_interpolation_info(cable_index).cwg                   = cwg_full;
+                    fm.biarc_interpolation_info(cable_index).wrapping_case         = wrapping_case{cable_index};
+                    fm.biarc_interpolation_info(cable_index).u                     = u;
+                    fm.biarc_interpolation_info(cable_index).vd                    = vd;
+                    fm.biarc_interpolation_info(cable_index).fval                  = fval;
+                    fm.biarc_interpolation_info(cable_index).output                = output;
+                    fm.biarc_interpolation_info(cable_index).biarc                 = biarc;
+                    fm.biarc_interpolation_info(cable_index).vec_ctrl_pts          = [ctrl_pt1, int_pt, ctrl_pt2];
+                    fm.biarc_interpolation_info(cable_index).vec_unit_tan          = [t_ctrl_pt1_unit, t_int_pt_unit, t_ctrl_pt2_unit];
+                    fm.biarc_interpolation_info(cable_index).vec_normal            = [n_ctrl_pt1_unit, n_int_pt_unit, n_ctrl_pt2_unit];
+                    fm.biarc_interpolation_info(cable_index).vec_center            = [c1, c2];
+                    fm.biarc_interpolation_info(cable_index).r                     = [r1; r2];
+                    fm.biarc_interpolation_info(cable_index).theta                 = [theta1, theta2];
+                else
+                    % For cases where wrapping is not considered
+                    u0 = u0_all(cable_index, :);
+                    u  = u0;
+        
+                    % Save minimum information into the 'fm' structure
+                    fm.biarc_interpolation_info(cable_index).cable_index       = cable_index;
+                    fm.biarc_interpolation_info(cable_index).cwg               = cwg_full;
+                    fm.biarc_interpolation_info(cable_index).wrapping_case     = wrapping_case{cable_index};
+                    fm.biarc_interpolation_info(cable_index).u                 = u;
+                    fm.biarc_interpolation_info(cable_index).theta             = [0, 0];
+                    fm.biarc_interpolation_info(cable_index).fval              = 0;
+                    fm.biarc_interpolation_info(cable_index).r                 = [0; 0];
+                end
+            end
+        
+            % Plot biarcs if the option is enabled
+            if fm.plot_biarc
+                fm.plotBiarc([1, 2, 3]);
+            end
+        end
+        
+        % Plot biarcs
+        function plotBiarc(fm, cables)
+            
+            if nargin < 2
+                cables = [1 2 3];
+            end
+            
+            color_cell = {'r','g','b','c'}
+            figure;
+            for cable_index = cables;
+                % cwg projection on the xz plane
+                cwg_proj_xz          = fm.biarc_interpolation_info(cable_index).cwg(:,[1,3]);
+                breaks = fnbrk(fm.biarc_interpolation_info(cable_index).biarc,'b');
+                hold on
+                % CWG
+                plot(cwg_proj_xz(:,1), cwg_proj_xz(:,2), 'LineWidth',10, 'Color',color_cell{cable_index});
+                % Biarcs
+                fnplt(fm.biarc_interpolation_info(cable_index).biarc,breaks(1:2),'b',3),...
+                    fnplt(fm.biarc_interpolation_info(cable_index).biarc,breaks(2:3),'r',3);
+                % % Circel centers
+        %         plot(c1(1),c1(2),'Marker','o','MarkerSize',10);
+        %         plot(c2(1),c2(2),'Marker','o','MarkerSize',10);
+                vd = fm.biarc_interpolation_info(cable_index).vd;
+                quiver(vd(1,:),vd(2,:),vd(4,:),-vd(3,:)) 
+            end
+            hold off
+            
+        end
+        
+        % Function to estimate friction between a moving cable and a NURBS surface
+        function estimateCableFriction(fm, wrapping_case, bk_p, bk_obs_p, T)
+            % Inputs:
+            % mu - Coefficient of friction between the cable and the surface
+            % T  - Cable tension (assumed constant along the cable)
+            % x, y, z - Arrays of x, y, z coordinates defining the 3D geodesic curve
+        
+            % Loop over each actuator/cable
+            for cable_index = 1:fm.model.model.numActuators
+                % Determine the wrapping case and compute the cable wrapping geometry (cwg)
+                switch wrapping_case{cable_index}
+                    case 'self_wrapping'
+                        % Get optimized parameters for 'self_wrapping' case
+                        bopt = bk_p{cable_index}(1);
+                        kopt = bk_p{cable_index}(2);
+                        
+                        % Get helix parameters for the cable
+                        param = fm.model.model_config.cable_info.cable{cable_index}.helixParams;
+
+                        % Generate numerical composite helix curve
+                        [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+                        
+                    % Generate numerical composite helix curve
+                    [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+    
+                    case 'obstacle_wrapping'
+                        % Get optimized parameters for obstacle wrapping
+                        bk_obs_opt = bk_obs_p{cable_index};
+        
+                        % Get obstacle helix parameters for the cable
+                        param = fm.model.model_config.cable_info.cable{cable_index}.obsHelixParams;
+        
+                        % Check the surface name and generate obstacle helix curve accordingly
+                        if strcmp(fm.model.model_config.obsHelixParams.obstacle_surface_param.surface_name, 'nurbs_and_bezier')
+                            [cwg, ~] = fm.model.model_config.model_geodesic.GenObstacleNumCompHelixCurve(param, bk_obs_opt);
+                        else
+                            [cwg, ~, ~] = fm.model.model_config.GenObstacleNumCompHelixCurve(param, bk_obs_opt);
+                        end
+        
+                    case 'no_wrapping'
+                        % No wrapping case, but still computing cwg
+                        bopt = bk_p{cable_index}(1);
+                        kopt = bk_p{cable_index}(2);
+                        
+                        % Get helix parameters for the cable
+                        param = fm.model.model_config.cable_info.cable{cable_index}.helixParams;
+        
+                        % Generate numerical composite helix curve
+                        [cwg, ~] = fm.model.model_config.GenNumCompHelixCurve(param, bopt, kopt);
+        
+                    case 'multi_wrapping'
+                        % Handle 'multi_wrapping' case
+                        for i = 2:length(fm.model.wrap_optimizer_with_gen_int_det.object_connection_map)-1
+                            object_connection_map = fm.model.wrap_optimizer_with_gen_int_det.object_connection_map;
+                            % Additional code needed here to handle multi_wrapping
+                            cwg = object_connection_map(2).object.alpha;  
+                        end
+                    otherwise
+                        error('Unknown wrapping case: %s', wrapping_case{cable_index});     
+                end
+                
+                % Compute Coulomb's friction in conventional manner
+                % (assuming modeled cable tension is close to required
+                % cable tension)
+                [N_force, friction_force_per_unit_length, total_friction_force] = fm.computeCoulombsfrictionConventional(cwg, T(cable_index));
+
+                % Iteartive computation of Coulombs friction where the
+                % modeled cable force is assumed to be cable force at the
+                % exit of cable
+                [N_force_iterative, friction_force_per_unit_length_iterative, total_friction_force_iterative] = ...
+                                                                                    fm.computeCoulombsfrictionIterative(cwg, T(cable_index));
+
+                % Computation by Capstan Equation
+                %Method 1: By simply using the capstan equation from one
+                %arc segment to other
+                % MEhod 2 : By sing the equation from Konyukov 2021 paper 
+                [total_friction_force_capstan1  total_friction_force_capstan2 ]= ...
+                    fm.computeCapstanEquationFriction(cwg, T(cable_index))
+
+
+
+                % Save thecable friction information into the 'fm' structure
+                fm.coulomb_cable_friction_info(cable_index).cable_index           = cable_index;
+                fm.coulomb_cable_friction_info(cable_index).cwg                   = cwg;
+                fm.coulomb_cable_friction_info(cable_index).wrapping_case         = wrapping_case{cable_index};
+                % fm.coulomb_cable_friction_info(cable_index).kappa                 = kappa;
+                % fm.coulomb_cable_friction_info(cable_index).N_force               = N_force;
+                fm.coulomb_cable_friction_info(cable_index).friction_force_per_unit_length = friction_force_per_unit_length;
+                fm.coulomb_cable_friction_info(cable_index).total_friction_force           = total_friction_force;
+
+                fm.coulomb_cable_friction_info(cable_index).N_force_iterative               = N_force_iterative;
+                fm.coulomb_cable_friction_info(cable_index).friction_force_per_unit_length_iterative = friction_force_per_unit_length_iterative;
+                fm.coulomb_cable_friction_info(cable_index).total_friction_force_iterative           = total_friction_force_iterative;
+
+                fm.coulomb_cable_friction_info(cable_index).total_friction_force_capstan1 = total_friction_force_capstan1;
+                fm.coulomb_cable_friction_info(cable_index).total_friction_force_capstan2 = total_friction_force_capstan2;
+
+
+            end
+        end
+        
+        % Friction determination by 
+        function [N_force, friction_force_per_unit_length, total_friction_force] = computeCoulombsfrictionConventional(fm, cwg, T)
+            % Ensure inputs are column vectors
+                x = cwg(:,1);
+                y = cwg(:,2);
+                z = cwg(:,3);
+                
+                % Number of points
+                N = length(x);
+                
+                % Compute the differential arc length (ds) between points
+                ds = sqrt(diff(x).^2 + diff(y).^2 + diff(z).^2);
+                
+                % Cumulative arc length along the curve
+                s = [0; cumsum(ds)];
+                
+                % Compute first derivatives with respect to arc length (tangents)
+                dx_ds = gradient(x, s);
+                dy_ds = gradient(y, s);
+                dz_ds = gradient(z, s);
+                
+                % Compute second derivatives with respect to arc length
+                d2x_ds2 = gradient(dx_ds, s);
+                d2y_ds2 = gradient(dy_ds, s);
+                d2z_ds2 = gradient(dz_ds, s);
+                
+                % Compute curvature at each point
+                % Using the formula: curvature kappa = |(r' x r'')| / |r'|^3
+                numerator = sqrt((dy_ds .* d2z_ds2 - dz_ds .* d2y_ds2).^2 + ...
+                                 (dz_ds .* d2x_ds2 - dx_ds .* d2z_ds2).^2 + ...
+                                 (dx_ds .* d2y_ds2 - dy_ds .* d2x_ds2).^2);
+                denominator = (dx_ds.^2 + dy_ds.^2 + dz_ds.^2).^(3/2);
+                kappa = numerator ./ denominator;
+                
+                % Handle any NaN or Inf values due to numerical issues
+                kappa(isnan(kappa) | isinf(kappa)) = 0;
+                
+                % Normal way, assuming required cable tension and modeled
+                % cable tension are quite same
+                % Compute normal force per unit length at each point (N = T * kappa)
+                N_force = T * kappa;
+                
+                % Compute frictional force per unit length (Ff = mu * N)
+                friction_force_per_unit_length = fm.mu * N_force;
+                
+                % Compute total frictional force by integrating along the curve
+                total_friction_force = trapz(s, friction_force_per_unit_length);
+        end
+        
+        function [N_force_iterative, friction_force_per_unit_length_iterative, total_friction_force_iterative] = ...
+                computeCoulombsfrictionIterative(fm, cwg, T)
+                % Ensure inputs are column vectors
+                x = cwg(:,1);
+                y = cwg(:,2);
+                z = cwg(:,3);
+                
+                % Number of points
+                N = length(x);
+                
+                % Compute the differential arc length (ds) between points
+                ds = sqrt(diff(x).^2 + diff(y).^2 + diff(z).^2);
+                
+                % Cumulative arc length along the curve
+                s = [0; cumsum(ds)];
+                
+                % Compute first derivatives with respect to arc length (tangents)
+                dx_ds = gradient(x, s);
+                dy_ds = gradient(y, s);
+                dz_ds = gradient(z, s);
+                
+                % Compute second derivatives with respect to arc length
+                d2x_ds2 = gradient(dx_ds, s);
+                d2y_ds2 = gradient(dy_ds, s);
+                d2z_ds2 = gradient(dz_ds, s);
+                
+                % Compute curvature at each point
+                % Using the formula: curvature kappa = |(r' x r'')| / |r'|^3
+                numerator = sqrt((dy_ds .* d2z_ds2 - dz_ds .* d2y_ds2).^2 + ...
+                                 (dz_ds .* d2x_ds2 - dx_ds .* d2z_ds2).^2 + ...
+                                 (dx_ds .* d2y_ds2 - dy_ds .* d2x_ds2).^2);
+                denominator = (dx_ds.^2 + dy_ds.^2 + dz_ds.^2).^(3/2);
+                kappa = numerator ./ denominator;
+                
+                % Handle any NaN or Inf values due to numerical issues
+                kappa(isnan(kappa) | isinf(kappa)) = 0;
+                
+                %Iterative manner
+                % Initialize Tension array
+                Tension = zeros(N, 1);
+                T_end      = T;
+                Tension(N) = T_end; % Required tension at the end point
+                
+                % Initialize frictional force per unit length
+                friction_force_per_unit_length_iterative = zeros(N,1);
+                
+                % Loop over segments from end to start to compute tension due to friction
+                for i = N:-1:2
+                    % Compute normal force at segment i
+                    N_force_iterative = Tension(i) * kappa(i);
+                    
+                    % Compute frictional force per unit length at segment i
+                    friction_force_per_unit_length_iterative(i) = fm.mu * N_force_iterative;
+                    
+                    % Update tension for the previous segment
+                    Tension(i-1) = Tension(i) + friction_force_per_unit_length_iterative(i) * ds(i-1);
+                end
+                
+                % Total pulling force is the tension at the start of the cable
+                total_pulling_force_iterative = Tension(1);
+                
+                % Total frictional force is total pulling force minus required end tension
+                total_friction_force_iterative = total_pulling_force_iterative - T_end;
+        end
+
+        % Friction determination by Capstan Equation
+        function [total_friction_force1, total_friction_force2] = ...
+                computeCapstanEquationFriction(fm, cwg, T)
+                
+                %METHOD 1
+                % Ensure inputs are column vectors
+                x = cwg(:,1);
+                y = cwg(:,2);
+                z = cwg(:,3);
+
+                % Number of points
+                N = length(x);
+                
+                % Compute the differential arc length (ds) between points
+                ds = sqrt(diff(x).^2 + diff(y).^2 + diff(z).^2);
+                ds = [ds; ds(end)]; % Append last value to match dimensions
+
+                % Compute tangents at each point
+                tx = gradient(x);
+                ty = gradient(y);
+                tz = gradient(z);
+                tangent = [tx, ty, tz];
+                tangent_norm = sqrt(tx.^2 + ty.^2 + tz.^2);
+                tangent = tangent ./ tangent_norm; % Normalize tangents
+
+                % Compute wrap angle between successive segments
+                delta_theta = zeros(N-1,1);
+                for i = 1:N-1
+                    % Dot product between tangents gives cosine of angle between segments
+                    cos_theta = dot(tangent(i,:), tangent(i+1,:));
+                    % Clamp value to [-1,1] to avoid numerical issues
+                    cos_theta = max(min(cos_theta,1), -1);
+                    % Angle between segments
+                    delta_theta(i) = acos(cos_theta);
+                end
+                delta_theta = [delta_theta; 0]; % Append zero to match dimensions
+
+                 % Cumulative wrap angle along the cable
+                cumulative_theta = cumsum(delta_theta);
+                
+                % Initialize Tension array
+                Tension = zeros(N, 1);
+                Tension(1) = T; % Starting tension at the pulling end
+                
+                % Apply Capstan equation incrementally
+                for i = 1:N-1
+                    % Tension at next point using Capstan equation
+                    % Incremental form: Tension(i+1) = Tension(i) * exp(-mu * delta_theta(i))
+                    Tension(i+1) = Tension(i) * exp(-fm.mu * delta_theta(i));
+                end
+                
+                % Total frictional force is the difference between initial and final tension
+                total_friction_force1 = T - Tension(end);
+
+                %METHOD 2 (KonyuKOv 2021, Eq. 16) -->T_0 \, T = \exp\left(-\mu \int k(s) \, ds\right)
+
+                % Cumulative arc length along the curve
+                s = [0; cumsum(ds)];
+                
+                % Compute first derivatives with respect to arc length (tangents)
+                dx_ds = gradient(x, s(2:end));
+                dy_ds = gradient(y, s(2:end));
+                dz_ds = gradient(z, s(2:end));
+                
+                % Compute second derivatives with respect to arc length
+                d2x_ds2 = gradient(dx_ds, s(2:end));
+                d2y_ds2 = gradient(dy_ds, s(2:end));
+                d2z_ds2 = gradient(dz_ds, s(2:end));
+                
+                % Compute curvature at each point
+                % Using the formula: curvature kappa = |(r' x r'')| / |r'|^3
+                numerator = sqrt((dy_ds .* d2z_ds2 - dz_ds .* d2y_ds2).^2 + ...
+                                 (dz_ds .* d2x_ds2 - dx_ds .* d2z_ds2).^2 + ...
+                                 (dx_ds .* d2y_ds2 - dy_ds .* d2x_ds2).^2);
+                denominator = (dx_ds.^2 + dy_ds.^2 + dz_ds.^2).^(3/2);
+                kappa = numerator ./ denominator;
+
+                % Initialize Tension array
+                T_0 = T; % Starting tension at the link end
+
+                % Handle any NaN or Inf values due to numerical issues
+                kappa(isnan(kappa) | isinf(kappa)) = 0;
+                
+                % Compute frictional force per unit length (Ff = mu * N)
+                integrand = fm.mu * kappa;
+                
+                % Compute total required force by integrating along the curve
+                T_in = T_0*exp(trapz(s(2:end), integrand));
+                
+                % Total frictional force is the difference between initial and final tension
+                total_friction_force2 = T_in - T_0;
+        end
+
+        %Dahls friction
+        function computeDahlsFriction(fm, l_dot, f_C, f_D_prev, dt)
+
+            numCables  = fm.model.model_config.cdpr_model.numCablesActive;
+
+            f_D = f_C.*sign(l_dot) + (f_D_prev' - f_C.*sign(l_dot)).*exp(-(fm.sig./f_C).*dt.*abs(l_dot));
+
+            for cable_index = 1:numCables
+                if isnan(f_D(cable_index))
+                    f_D(cable_index) = 0;
+                end
+                % Dahls friction
+                fm.coulomb_cable_friction_info(cable_index).f_D = f_D(cable_index);
+            end
+            
+        end    
+
+
+
+        % Objective function for biarc interpolation
+        function f = ObjFuncForBiarcInterpolation(fm, u, cwg2_proj_xz)
+            % CWG projected to xz plane and its tangent and normal vectors    
+            %Tangent vector
+            t1 = (cwg2_proj_xz(2,:)' - cwg2_proj_xz(1,:)')/norm((cwg2_proj_xz(2,:)' - cwg2_proj_xz(1,:)'));
+            t11 = cwg2_proj_xz(3,:)' - cwg2_proj_xz(2,:)';
+            t22 = cwg2_proj_xz(end-1,:)' - cwg2_proj_xz(end-2,:)';
+            t2 = (cwg2_proj_xz(end,:)' - cwg2_proj_xz(end-1,:)')/norm(cwg2_proj_xz(end,:)' - cwg2_proj_xz(end-1,:)');
+            
+            % n1 = t11 - t1;
+            % n2 = t2 - t22;
+            n1 = [-t1(2), t1(1)]';
+            n2 = [-t2(2), t2(1)]';
+        
+            %% Biarc formation
+            p = [cwg2_proj_xz(1,1) cwg2_proj_xz(100,1); cwg2_proj_xz(1,2) cwg2_proj_xz(100,2)]; 
+            
+            u11 = u(1); u12 = u(2); u21 = u(3); u22 = u(4); 
+            u = [u11  u12;u21  u22];
+        
+            biarc = rscvn(p,u); breaks = fnbrk(biarc,'b');
+        
+            % normal vectors
+            vd = fntlr(biarc,2,breaks);
+            
+            %C0ntrol and intersection point
+            ctrl_pt1 = vd(1:2,1);
+            int_pt   = vd(1:2,2);
+            ctrl_pt2 = vd(1:2,3);
+            
+            % tangent vectors
+            t_ctrl_pt1 = vd(3:4,1);%/norm(vd(3:4,1));
+            t_int_pt   = vd(3:4,2);%/norm(vd(3:4,2));
+            t_ctrl_pt2 = vd(3:4,3);%/norm(vd(3:4,3));
+            
+            % unit tangent vectors
+            t_ctrl_pt1_unit = vd(3:4,1)/norm(vd(3:4,1));
+            t_int_pt_unit   = vd(3:4,2)/norm(vd(3:4,2));
+            t_ctrl_pt2_unit = vd(3:4,3)/norm(vd(3:4,3));
+            
+            % normal vectors (Any direction is fine)
+            n_ctrl_pt1 = [vd(4,1) -vd(3,1)]';
+            n_int_pt   = [vd(4,2) -vd(3,2)]';
+            n_ctrl_pt2 = [vd(4,3) -vd(3,3)]';
+            
+            f = norm(n1'*t_ctrl_pt1) + norm(n2'*t_ctrl_pt2);
+        end
+
+        % Objective function for biarc interpolation in 3D
+        function f = ObjFuncFor3dBiarcInterpolation(fm, u, cwg_full)
+            % Inputs:
+            %   fm        - Structure (may contain parameters, not used directly here)
+            %   u         - Optimization variable [6 x 1] vector containing components of the tangent vectors at start and end points
+            %   cwg_full  - [N x 3] matrix containing the full 3D CWG data
+        
+            % Number of points in the CWG
+            N = size(cwg_full, 1);
+        
+            % Compute the unit tangent vectors at the start and end of the CWG
+            t1 = cwg_full(2, :)' - cwg_full(1, :)';
+            t1_unit = t1 / norm(t1);
+        
+            t2 = cwg_full(N, :)' - cwg_full(N-1, :)';
+            t2_unit = t2 / norm(t2);
+        
+            % Define control points in 3D (start and end points of the CWG)
+            p = [cwg_full(1, :)', cwg_full(N, :)'];
+        
+            % Reshape 'u' into a [3 x 2] matrix for the tangent vectors at start and end points
+            % 'u' contains the tangent vectors flattened into a vector: [ux1; uy1; uz1; ux2; uy2; uz2]
+            u = reshape(u, [3, 2]);
+        
+            % Create a biarc spline curve using the control points and optimized tangent vectors
+            biarc = rscvn(p, u);
+            breaks = fnbrk(biarc, 'b');
+        
+            % Compute the derivative (tangent) vectors at the spline breakpoints
+            % 'vd' will be a [6 x 3] matrix:
+            %   Rows 1-3: positions at breakpoints
+            %   Rows 4-6: derivatives (tangents) at breakpoints
+            vd = fntlr(biarc, 2, breaks);
+        
+            % Extract control points and tangent vectors from 'vd'
+            ctrl_pt1 = vd(1:3, 1);
+            int_pt   = vd(1:3, 2); % Intersection point between the two arcs
+            ctrl_pt2 = vd(1:3, 3);
+        
+            % Tangent vectors at the control points of the biarc
+            t_ctrl_pt1 = vd(4:6, 1);
+            t_ctrl_pt2 = vd(4:6, 3);
+        
+            % Normalize the tangent vectors to obtain unit vectors
+            t_ctrl_pt1_unit = t_ctrl_pt1 / norm(t_ctrl_pt1);
+            t_ctrl_pt2_unit = t_ctrl_pt2 / norm(t_ctrl_pt2);
+        
+            % Compute the objective function as the sum of squared differences between
+            % the CWG tangents and the biarc tangents at the start and end points
+            f = norm(t1_unit - t_ctrl_pt1_unit)^2 + norm(t2_unit - t_ctrl_pt2_unit)^2;
+        end
+
+        % The implementation of the resolve function.
+        function [actuation_forces, Q_opt, id_exit_type] = resolveFunctionCW(obj, dynamics, J_lq)
+            % Form the linear EoM constraint
+            % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
+            [A_eq, b_eq] = IDSolverBaseCW.GetEoMConstraints(dynamics, J_lq);
+            % Form the lower and upper bound force constraints
+            fmin = dynamics.actuationForcesMin;
+            fmax = dynamics.actuationForcesMax;
+            % Get objective function
+            obj.objective.updateObjective(dynamics);
+
+            A_ineq = [];
+            b_ineq = [];
+            for i = 1:length(obj.constraints)
+                obj.constraints{i}.updateConstraint(dynamics);
+                A_ineq = [A_ineq; obj.constraints{i}.A];
+                b_ineq = [b_ineq; obj.constraints{i}.b];
+            end
+
+            % Solves the QP ID different depending on the solver type
+            switch (obj.qp_solver_type)
+                % Basic version that uses MATLAB's solver
+                case ID_QP_SolverType.MATLAB
+                    if(isempty(obj.options))
+                        % solve the potential naming issues in matlab
+                        [~, d] = version;
+                        % derive the publish year of the Matlab being used
+                        year = str2double(d(length(d)-3:length(d)));
+                        if year >= 2016
+                            tol_string = 'StepTolerance';
+                        else
+                            tol_string = 'TolX';
+                        end
+                        obj.options = optimoptions('quadprog', tol_string, 1e-17, 'Display', 'off', 'MaxIter', 100);
+                    end
+
+                    % Implementing \min \frac{1}{2}{\bm{x}}^T H{\bm x} + f^T*{\bm{x}} 
+                    %               s.t. A_eq{\bm x} = b_eq, EoM constraint
+                    % where {\bm{x}} is cable force vector
+
+                    H = obj.objective.A; % Hessian
+                    f = obj.objective.b; % 
+                    [actuation_forces, id_exit_type] = id_qp_matlab(H, f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);                    
+                % Basic version that uses MATLAB's solver
+                case ID_QP_SolverType.MATLAB_INTERIOR_POINT
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('quadprog','Algorithm','interior-point-convex', 'ConstraintTolerance', 1e-1, 'Display', 'off', 'MaxIter', 100);
+                    end
+                    [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);                    
+                % Uses MATLAB solver with a warm start strategy on the
+                % active set
+                case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                    end
+                    [actuation_forces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
+                % Uses the IPOPT algorithm from OptiToolbox
+                case ID_QP_SolverType.OPTITOOLBOX_IPOPT
+                    if(obj.is_OptiToolbox)
+                        if(isempty(obj.options))
+                            obj.options = optiset('solver', 'IPOPT', 'maxiter', 100);
+                        end
+                        [actuation_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        end
+                        [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    end
+                % Uses the OOQP algorithm from the Optitoolbox
+                case ID_QP_SolverType.OPTITOOLBOX_OOQP
+                    if(obj.is_OptiToolbox)
+                        if(isempty(obj.options))
+                            obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
+                        end
+                        [actuation_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        end
+                        [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    end
+                otherwise
+                    CASPR_log.Print('ID_QP_SolverType type is not defined',CASPRLogLevel.ERROR);
+            end
+
+            % If there is an error, cable forces will take on the invalid
+            % value and Q_opt is infinity
+            if (id_exit_type ~= IDSolverExitType.NO_ERROR)
+                actuation_forces = dynamics.ACTUATION_ACTIVE_INVALID;
+                Q_opt = inf;
+            % Otherwise valid exit, compute Q_opt using the objective
+            else
+                Q_opt = obj.objective.evaluateFunction(actuation_forces);
+            end
+            % Set f_previous, may be useful for some algorithms
+            obj.f_previous = actuation_forces;
+        end
+
+        % Helps to add an additional constraint to the QP problem
+        function addConstraint(obj, linConstraint)
+            obj.constraints{length(obj.constraints)+1} = linConstraint;
+        end
+    end
+end
