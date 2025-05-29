@@ -27,3 +27,32 @@ The tutorial scripts provided in the `scripts/CASPR_tutorials` folder are untest
 Additionally, you can explore the CASPR tutorial series on YouTube for step-by-step guidance:  
 [CASPR YouTube Playlist](https://www.youtube.com/watch?v=b_24t_j1uQo&list=PLZCfv3Lre4aVbsS8zFYlg2x-kPuB-rrRC)
 
+## Model
+## Model
+
+### NURBS Teapot Model
+The `.mat` files for the NURBS teapot model are located in the `data/nurbs_related` directory.
+
+### BMWrapArm Model
+In this work, we have utilized the BMWrapArm model. The configuration files for this model are available in the `data/model_config/models/MCDM/BMWrapArm` directory. Below is a description of the key files:
+
+1. **BMWrapArm_bodies.xml**  
+    Contains information about the CDPR bodies, including:
+    - Initial joint pose
+    - Center of mass and its location
+    - Inertial matrix
+
+2. **BMWrapArm_cables.xml**  
+    Provides details about cable locations and attachment points.
+
+3. **BMWrapArm_operational_spaces.xml**  
+    Specifies information related to operational spaces.
+
+4. **BMWrapArm_trajectories.xml**  
+    Includes details about trajectories.
+
+### Note on Other Robots
+Other robot models are available in the `SCDM`, `MCDM`, and `HCDM` directories. However, wrapping models have not been implemented for these robots.
+
+
+## Running the scripts
