@@ -8,7 +8,7 @@
 ![GeoWrapSim-CDPR](resources/figures/fig_git.png)
 
 ### Full Video
-Click [here](resources/vid/Video.mp4) to view the full video.
+Click [here](https://drive.google.com/file/d/1wv_-YRMZ-RpaE7pxipY27WhJc2ZteXAT/view?usp=sharing) to view the full video.
 
 ## Installation
 
