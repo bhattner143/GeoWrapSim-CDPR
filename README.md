@@ -17,6 +17,13 @@ To set up the repository, follow these steps:
 
 ### About CASPR
 CASPR is a simulation framework designed for modeling and analyzing cable-driven parallel robots. It provides tools for kinematic and dynamic analysis, enabling researchers and engineers to study complex cable-driven systems effectively.
+### Tutorials for CASPR
 
+To get started with CASPR, explore the tutorial scripts provided in the `scripts/CASPR_tutorials` folder. These `.mlx` scripts offer step-by-step guidance on using CASPR for various applications, including kinematic and dynamic analysis of cable-driven parallel robots. Open these scripts in MATLAB to follow the tutorials interactively.
+### Note on Tutorials
 
+The tutorial scripts provided in the `scripts/CASPR_tutorials` folder are untested due to modifications in the repository. If you encounter any issues, you can refer to the original CASPR repository for tutorials at [CASPR GitHub Repository](https://github.com/darwinlau/CASPR).
+
+Additionally, you can explore the CASPR tutorial series on YouTube for step-by-step guidance:  
+[CASPR YouTube Playlist](https://www.youtube.com/watch?v=b_24t_j1uQo&list=PLZCfv3Lre4aVbsS8zFYlg2x-kPuB-rrRC)
 
