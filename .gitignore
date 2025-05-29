@@ -13,3 +13,5 @@ resources/vid/Video.MOV
 
 logs/
 /**/*.asvresources/vid/Video.MOV
+resources/vid/*.MOV
+resources/figures/*.svg
