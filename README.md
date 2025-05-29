@@ -2,7 +2,7 @@
 
 [Paper Link](https://www.techrxiv.org/users/788558/articles/1022587-kinematic-and-dynamic-modeling-of-cable-object-interference-and-wrapping-in-complex-geometrical-shaped-cable-driven-parallel-robots)
 
-![GeoWrapSim-CDPR Overview](figures/fig_git.png)
+![GeoWrapSim-CDPR Overview](figures/fig_git2.png)
 
 ## Installation
 
