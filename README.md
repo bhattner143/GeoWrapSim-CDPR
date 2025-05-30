@@ -121,10 +121,11 @@ Implements the friction model discussed in Section 6 of the paper.
 ## Citation
 
 Cite as:  
-Dipankar Bhattacharya, T K Cheung, Yaxiang Wang, et al. Kinematic and Dynamic Modeling of Cable-Object Interference and Wrapping in Complex Geometrical-Shaped Cable-Driven Parallel Robots. TechRxiv. June 04, 2024.  
-DOI: 10.36227/techrxiv.171746934.49156915/v1
+Dipankar Bhattacharya, T K Cheung, Yaxiang Wang, et al. Kinematic and Dynamic Modeling of Cable-Object Interference and Wrapping in Complex Geometrical-Shaped Cable-Driven Parallel Robots. TechRxiv. June 04, 2024. DOI: 10.36227/techrxiv.171746934.49156915/v1
 
+```bash
 @article{bhattacharyakinematic,
   title={Kinematic and Dynamic Modeling of Cable-Object Interference and Wrapping in Complex Geometrical-Shaped Cable-Driven Parallel Robots},
   author={Bhattacharya, Dipankar and Cheung, TK and Wang, Yaxiang and Lau, Darwin}
 }
+```
