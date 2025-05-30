@@ -12,7 +12,7 @@ Click [here](https://drive.google.com/file/d/1wv_-YRMZ-RpaE7pxipY27WhJc2ZteXAT/v
 
 ## Installation
 
-To set up the repository, follow these steps:
+### Steps to Set Up the Repository
 
 1. **Clone the repository**:
     ```bash
@@ -26,15 +26,17 @@ To set up the repository, follow these steps:
     Run the `initialise_CASPR.m` script to configure the Cable-Driven Parallel Robot Simulator (CASPR) environment.
 
 ### About CASPR
-CASPR is a simulation framework designed for modeling and analyzing cable-driven parallel robots. It provides tools for kinematic and dynamic analysis, enabling researchers and engineers to study complex cable-driven systems effectively.
+CASPR is a simulation framework for modeling and analyzing cable-driven parallel robots. It provides tools for kinematic and dynamic analysis, enabling researchers and engineers to study complex cable-driven systems effectively.
+
 ### Tutorials for CASPR
 
-To get started with CASPR, explore the tutorial scripts provided in the `scripts/CASPR_tutorials` folder. These `.mlx` scripts offer step-by-step guidance on using CASPR for various applications, including kinematic and dynamic analysis of cable-driven parallel robots. Open these scripts in MATLAB to follow the tutorials interactively.
+Explore the tutorial scripts in the `scripts/CASPR_tutorials` folder. These `.mlx` scripts provide step-by-step guidance on using CASPR for various applications, including kinematic and dynamic analysis of cable-driven parallel robots. Open these scripts in MATLAB to follow the tutorials interactively.
+
 ### Note on Tutorials
 
-The tutorial scripts provided in the `scripts/CASPR_tutorials` folder are untested due to modifications in the repository. If you encounter any issues, you can refer to the original CASPR repository for tutorials at [CASPR GitHub Repository](https://github.com/darwinlau/CASPR).
+The tutorial scripts in the `scripts/CASPR_tutorials` folder are untested due to modifications in the repository. If you encounter issues, refer to the original CASPR repository for tutorials at [CASPR GitHub Repository](https://github.com/darwinlau/CASPR).
 
-Additionally, you can explore the CASPR tutorial series on YouTube for step-by-step guidance:  
+You can also explore the CASPR tutorial series on YouTube for step-by-step guidance:  
 [CASPR YouTube Playlist](https://www.youtube.com/watch?v=b_24t_j1uQo&list=PLZCfv3Lre4aVbsS8zFYlg2x-kPuB-rrRC)
 
 ## Model
@@ -43,25 +45,34 @@ Additionally, you can explore the CASPR tutorial series on YouTube for step-by-s
 The `.mat` files for the NURBS teapot model are located in the `data/nurbs_related` directory.
 
 ### BMWrapArm Model
-In this work, we have utilized the BMWrapArm model. The configuration files for this model are available in the `data/model_config/models/MCDM/BMWrapArm` directory. Below is a description of the key files:
+The BMWrapArm model configuration files are available in the `data/model_config/models/MCDM/BMWrapArm` directory. Key files include:
 
 1. **BMWrapArm_bodies.xml**  
-    Contains information about the CDPR bodies, including:
-    - Initial joint pose
-    - Center of mass and its location
-    - Inertial matrix
+    - Initial joint pose  
+    - Center of mass and its location  
+    - Inertial matrix  
 
 2. **BMWrapArm_cables.xml**  
-    Provides details about cable locations and attachment points.
+    - Cable locations and attachment points  
 
 3. **BMWrapArm_operational_spaces.xml**  
-    Specifies information related to operational spaces.
+    - Operational spaces information  
 
 4. **BMWrapArm_trajectories.xml**  
-    Includes details about trajectories.
+    - Trajectory details  
 
 ### Note on Other Robots
 Other robot models are available in the `data/model_config/models/SCDM`, `data/model_config/models/MCDM`, and `data/model_config/models/HCDM` directories. However, wrapping models have not been implemented for these robots.
 
+## Running the Scripts
 
-## Running the scripts
+Simulation scripts are located in `/scripts/cable_wrapping/Simulations/`. Key scripts include:
+
+1. **Inverse Kinematics Simulation**  
+    Run `script_BMWrapArm_IK_cone_big_obs_nurbs_mul_obj_wrap.m` for inverse kinematics simulation with a teapot obstacle and cone-frustum mobile platform.
+
+2. **Inverse Dynamics Simulation**  
+    Run `script_BMWrapArm_ID_friction_cone_big_obs_nurbs_mul_obj_wrap.m` for inverse dynamics simulation with a friction obstacle and cone-frustum mobile platform.
+
+3. **Other Simulations**  
+    Additional scripts such as `script_BMWrapArm_geodesic_model_IK_almond.m` and `script_BMWrapArm_geodesic_model_IK_cone_big_obstacle_torus.m` are available for simulations with almond-shaped mobile platforms and cylinder obstacles, or cone-frustum mobile platforms and torus obstacles. These scripts may require debugging to function correctly.
