@@ -73,6 +73,47 @@ Simulation scripts are located in `/scripts/cable_wrapping/Simulations/`. Key sc
 
 2. **Inverse Dynamics Simulation**  
     Run `script_BMWrapArm_ID_friction_cone_big_obs_nurbs_mul_obj_wrap.m` for inverse dynamics simulation with a friction obstacle and cone-frustum mobile platform.
+    ## Code Overview
+
+    ### Geodesic Equations
+    **Class File:** `/model/nurbs/NURBSGeodesic.m`  
+    This class implements the geodesic equations, including Christoffel symbols, numerical solutions, metric tensors, and geometrical properties. It contains all foundational mathematics and equations related to geodesics discussed in Section 3.2 of the paper.
+
+    ### BMWrapArm Model Configuration
+    **Class File:** `/data/model_config/models/WrappingBezierGeodesicModelConfig.m`  
+    This class defines the BMWrapArm model, including bodies and cables. Note that the cables are discontinuous and not optimized in this class.
+
+    ### Cable Object Detection and Optimization
+    **Class File:** `/scripts/cable_wrapping/Simulations/MultipleCableObjectWrapping/CWOptWithGenIntDetBezier.m`  
+    This class implements the cable object detection algorithm (Algorithm 1) and performs optimization for cable wrapping geodesics for a static pose in multi-object cable wrapping scenarios, as discussed in Section 3.3 of the paper.
+
+    ### Single Object Cable Wrapping Optimization
+    **Class File:** `/model/optimizer/CableWrappingOptimizerBezier.m`  
+    This class handles numerical optimization for cable wrapping geodesics for a static pose in single-object cable wrapping scenarios, as detailed in Section 3.3 of the paper.
+
+    ### Graphical Simulator
+    **Class File:** `/CASPR/src/Simulation/CableWrappingMotionSimulatorBase.m`  
+    This class provides a graphical simulation environment for cable wrapping motion.
+
+    ### Inverse Kinematics (IK) Models
+    1. **Class File:** `/model/inverse_kinematics/CableWrappingGeodesicIKSimulatorBezier.m`  
+        Implements the inverse kinematics (IK) model based on geodesics, as described in Section 5 of the paper.
+
+    2. **Class File:** `/model/inverse_kinematics/CableWrappingInverseKinematicsSimulator.m`  
+        Implements an older version of the inverse kinematics (IK) model, as described in Section 5 of the paper.
+
+    ### Inverse Dynamics Solver
+    **Class File:** `/src/Analysis/InverseDynamics/Solvers/CableWrappingIDSolverQuadProgBezier.m`  
+    This class implements a quadratic programming-based inverse dynamics solver for cable-driven parallel robots, supporting multiple solver backends and linear constraints.
+
+    ### Inverse Dynamics Simulator
+    **Class File:** `/model/inverse_dynamics/CableWrappingInverseDynamicsSimulatorBezier.m`  
+    Implements the inverse cable wrapping dynamics simulator with the friction model discussed in Section 6 of the paper.
+
+    ### Friction Model
+    **Class File:** `/model/friction/BiarcInterpolation/CWGFrictionModelBezierSurfs.m`  
+    Implements the friction model discussed in Section 6 of the paper.
+
 
 3. **Other Simulations**  
     Additional scripts such as `script_BMWrapArm_geodesic_model_IK_almond.m` and `script_BMWrapArm_geodesic_model_IK_cone_big_obstacle_torus.m` are available for simulations with almond-shaped mobile platforms and cylinder obstacles, or cone-frustum mobile platforms and torus obstacles. These scripts may require debugging to function correctly.
