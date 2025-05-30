@@ -61,7 +61,7 @@ In this work, we have utilized the BMWrapArm model. The configuration files for 
     Includes details about trajectories.
 
 ### Note on Other Robots
-Other robot models are available in the `SCDM`, `MCDM`, and `HCDM` directories. However, wrapping models have not been implemented for these robots.
+Other robot models are available in the `data/model_config/models/SCDM`, `data/model_config/models/MCDM`, and `data/model_config/models/HCDM` directories. However, wrapping models have not been implemented for these robots.
 
 
 ## Running the scripts
